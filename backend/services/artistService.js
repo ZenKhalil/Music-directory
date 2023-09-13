@@ -1,11 +1,12 @@
 import Artist from '../models/artistModel.js';
+import { Op } from 'sequelize';
 
 const getAllArtists = async () => {
     return await Artist.findAll();
 };
 
 const getArtistById = async (id) => {
-    return await Artist.findById(id);
+    return await Artist.findByPk(id);
 };
 
 const createArtist = async (data) => {
@@ -13,7 +14,7 @@ const createArtist = async (data) => {
 };
 
 const updateArtist = async (id, data) => {
-    const artist = await Artist.findById(id);
+    const artist = await Artist.findByPk(id);
     if (!artist) return null;
     Object.assign(artist, data);
     await artist.save();
@@ -21,7 +22,7 @@ const updateArtist = async (id, data) => {
 };
 
 const deleteArtist = async (id) => {
-    const artist = await Artist.findById(id);
+    const artist = await Artist.findByPk(id);
     if (!artist) return;
     await artist.destroy();
 };
