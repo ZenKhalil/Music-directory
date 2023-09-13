@@ -1,11 +1,14 @@
 import Album from '../models/albumModel.js';
+import Artist from '../models/artistModel.js';
+import Track from '../models/trackModel.js';
+
 
 export const getAllAlbums = async () => {
     return await Album.findAll();
 };
 
 export const getAlbumById = async (id) => {
-    return await Album.findById(id);
+    return await Album.findByPk(id);
 };
 
 export const createAlbum = async (data) => {
@@ -13,7 +16,7 @@ export const createAlbum = async (data) => {
 };
 
 export const updateAlbum = async (id, data) => {
-    const album = await Album.findById(id);
+    const album = await Album.findByPk(id);
     if (!album) return null;
     Object.assign(album, data);
     await album.save();
@@ -21,7 +24,7 @@ export const updateAlbum = async (id, data) => {
 };
 
 export const deleteAlbum = async (id) => {
-    const album = await Album.findById(id);
+    const album = await Album.findByPk(id);
     if (!album) return null;
     await album.destroy();
     return album;
