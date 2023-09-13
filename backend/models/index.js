@@ -7,8 +7,18 @@ const sequelize = new Sequelize(
   development.password,
   {
     host: development.host,
-    dialect: 'mysql'
+    dialect: 'mysql',
+    logging: console.log  // Add this line
   }
 );
+
+
+sequelize.authenticate()
+  .then(() => {
+    console.log('Connection has been established successfully.');
+  })
+  .catch(error => {
+    console.error('Unable to connect to the database:', error);
+  });
 
 export default sequelize;
