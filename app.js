@@ -2,9 +2,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
-import artistRouter from './routes/artistRoutes.js';
-import albumRouter from './routes/albumRoutes.js';
-import trackRouter from './routes/trackRoutes.js';
+import artistRouter from './backend/routes/artistRoutes.js';
+import albumRouter from './backend/routes/albumRoutes.js';
+import trackRouter from './backend/routes/trackRoutes.js';
 
 const app = express();
 
@@ -25,7 +25,7 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3006;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

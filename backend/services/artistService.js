@@ -26,7 +26,18 @@ const deleteArtist = async (id) => {
     await artist.destroy();
 };
 
+const searchArtists = async (query) => {
+    return await Artist.findAll({
+        where: {
+            name: {
+                [Op.like]: `%${query}%`
+            }
+        }
+    });
+};
+
 export {
+    searchArtists,
     getAllArtists,
     getArtistById,
     createArtist,

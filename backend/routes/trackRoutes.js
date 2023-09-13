@@ -3,6 +3,8 @@ import * as trackController from '../controllers/trackController.js';
 
 const router = express.Router();
 
+router.get('/search', trackController.searchTracks);
+
 router.get('/', trackController.getAllTracks);
 router.get('/:id', trackController.getTrackById);
 router.post('/', trackController.createTrack);

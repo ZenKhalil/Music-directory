@@ -26,3 +26,13 @@ export const deleteTrack = async (id) => {
     await track.destroy();
     return track;
 };
+
+export const searchTracks = async (query) => {
+    return await Track.findAll({
+        where: {
+            name: {
+                [Op.like]: `%${query}%`
+            }
+        }
+    });
+};

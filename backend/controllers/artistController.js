@@ -48,3 +48,12 @@ export const deleteArtist = async (req, res, next) => {
         next(error);
     }
 };
+
+export const searchArtists = async (req, res) => {
+    try {
+        const artists = await artistService.searchArtists(req.query.q);
+        res.json(artists);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};

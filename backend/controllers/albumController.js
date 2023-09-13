@@ -48,3 +48,21 @@ export const deleteAlbum = async (req, res, next) => {
         next(error);
     }
 };
+
+export const searchAlbums = async (req, res) => {
+    try {
+        const albums = await albumService.searchAlbums(req.query.q);
+        res.json(albums);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
+export const createCompleteAlbum = async (req, res) => {
+    try {
+        const albumData = await albumService.createCompleteAlbum(req.body);
+        res.status(201).json(albumData);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};

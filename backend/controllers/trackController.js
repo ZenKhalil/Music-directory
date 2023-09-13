@@ -48,3 +48,12 @@ export const deleteTrack = async (req, res, next) => {
         next(error);
     }
 };
+
+export const searchTracks = async (req, res) => {
+    try {
+        const tracks = await trackService.searchTracks(req.query.q);
+        res.json(tracks);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
