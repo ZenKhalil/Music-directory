@@ -19,8 +19,11 @@ export const getAlbumsByArtist = async (artistId) => {
 };
 
 export const getAlbumById = async (id) => {
-    return await Album.findByPk(id);
+    return await Album.findByPk(id, {
+        include: Artist
+    });
 };
+
 
 export const createAlbum = async (data) => {
     return await Album.create(data);
@@ -46,6 +49,16 @@ export const searchAlbums = async (query) => {
         where: {
             name: {
                 [Op.like]: `%${query}%`
+            }
+        }
+    });
+};
+
+export const filterAlbumsByDate = async (date) => {
+    return await Album.findAll({
+        where: {
+            release_date: {
+                [Op.gte]: date
             }
         }
     });

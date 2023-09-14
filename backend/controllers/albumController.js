@@ -80,6 +80,16 @@ export const searchAlbums = async (req, res) => {
     }
 };
 
+export const filterAlbumsByDate = async (req, res) => {
+    try {
+        const albums = await albumService.filterAlbumsByDate(req.query.date);
+        res.json(albums);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
+
 export const createCompleteAlbum = async (req, res) => {
     try {
         const albumData = await albumService.createCompleteAlbum(req.body);
