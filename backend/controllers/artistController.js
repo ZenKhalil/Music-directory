@@ -3,7 +3,17 @@ import { validationResult } from 'express-validator';
 
 export const getAllArtists = async (req, res, next) => {
     try {
-        const artists = await artistService.getAllArtists();
+        const { sort, order, name, limit, offset } = req.query;
+
+        const queryParams = {
+            sort: sort,
+            order: order,
+            name: name,
+            limit: limit,
+            offset: offset
+        };
+
+        const artists = await artistService.getAllArtists(queryParams);
         res.json(artists);
     } catch (error) {
         next(error);

@@ -2,7 +2,17 @@ import * as trackService from '../services/trackService.js';
 
 export const getAllTracks = async (req, res, next) => {
     try {
-        const tracks = await trackService.getAllTracks();
+        const { sort, order, title, limit, offset } = req.query;
+
+        const queryParams = {
+            sort: sort,
+            order: order,
+            title: title,
+            limit: limit,
+            offset: offset
+        };
+
+        const tracks = await trackService.getAllTracks(queryParams);
         res.json(tracks);
     } catch (error) {
         next(error);

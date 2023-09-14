@@ -2,7 +2,11 @@ import * as albumService from '../services/albumService.js';
 
 export const getAllAlbums = async (req, res, next) => {
     try {
-        const { sort, order, release_date, title, limit, offset } = req.query;
+        const { sort, order, release_date, title } = req.query;
+        let { limit, offset } = req.query;
+
+        limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+        offset = isNaN(parseInt(offset)) ? 0 : parseInt(offset);
 
         const whereClause = {};
 
@@ -14,7 +18,7 @@ export const getAllAlbums = async (req, res, next) => {
             whereClause.title = title;
         }
 
-        const albums = await albumService.getAllAlbums(whereClause, sort, order, parseInt(limit), parseInt(offset));
+        const albums = await albumService.getAllAlbums(whereClause, sort, order, limit, offset);
         res.json(albums);
     } catch (error) {
         next(error);

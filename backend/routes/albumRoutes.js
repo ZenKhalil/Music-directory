@@ -1,10 +1,10 @@
 import express from 'express';
 import * as albumController from '../controllers/albumController.js';
-import { authenticate } from './middleware/authMiddleware';
-
-router.post('/albums', authenticate, albumController.createAlbum);
+import { authenticate } from './middleware/authMiddleware.js';
 
 const router = express.Router();
+
+router.post('/albums', authenticate, albumController.createAlbum);
 
 router.get('/search', albumController.searchAlbums);
 router.get('/filterByDate', albumController.filterAlbumsByDate);

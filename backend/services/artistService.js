@@ -1,8 +1,19 @@
 import Artist from '../models/artistModel.js';
 import { Op } from 'sequelize';
 
-const getAllArtists = async () => {
-    return await Artist.findAll();
+ const getAllArtists = async (queryParams) => {
+    const page = parseInt(queryParams.page, 10) || 1; 
+    const limit = parseInt(queryParams.limit, 10) || 10; 
+    const offset = (page - 1) * limit;
+
+    const sort = queryParams.sort || 'name'; 
+    const order = queryParams.order || 'ASC'; 
+
+    return await Artist.findAll({
+        order: [[sort, order]],
+        limit: limit,
+        offset: offset
+    });
 };
 
 const getArtistById = async (id) => {

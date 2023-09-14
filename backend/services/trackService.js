@@ -1,7 +1,19 @@
+import { Op } from 'sequelize'; // Import the Op object for operations like 'like'
 import Track from '../models/trackModel.js';
 
-export const getAllTracks = async () => {
-    return await Track.findAll();
+export const getAllTracks = async (queryParams) => {
+    const page = parseInt(queryParams.page, 10) || 1; 
+    const limit = parseInt(queryParams.limit, 10) || 10; 
+    const offset = (page - 1) * limit;
+
+    const sort = queryParams.sort || 'title'; 
+    const order = queryParams.order || 'ASC'; 
+
+    return await Track.findAll({
+        order: [[sort, order]],
+        limit: limit,
+        offset: offset
+    });
 };
 
 export const getTracksByAlbum = async (albumId) => {

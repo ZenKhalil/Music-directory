@@ -18,6 +18,4 @@ const Artist = sequelize.define('Artist', {
   tableName: 'artists',  // Navnet på tabellen i databasen.
 });
 
-Artist.hasMany(Album, { foreignKey: 'artist_id' }); // Define the association
-
 export default Artist;

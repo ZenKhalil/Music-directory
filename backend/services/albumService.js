@@ -3,10 +3,13 @@ import Artist from '../models/artistModel.js';
 import Track from '../models/trackModel.js';
 
 
-export const getAllAlbums = async (whereClause, sort, order, limit, offset) => {
+export const getAllAlbums = async (whereClause = {}, sort = 'title', order = 'ASC', limit = 10, offset = 0) => {
+    limit = isNaN(limit) ? 10 : limit;
+    offset = isNaN(offset) ? 0 : offset;
+
     return await Album.findAll({
         where: whereClause,
-        order: [[sort || 'title', order || 'ASC']],
+        order: [[sort, order]],
         limit: limit,
         offset: offset
     });

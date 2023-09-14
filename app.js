@@ -5,16 +5,20 @@ import cors from 'cors';
 import artistRouter from './backend/routes/artistRoutes.js';
 import albumRouter from './backend/routes/albumRoutes.js';
 import trackRouter from './backend/routes/trackRoutes.js';
+import { setupAssociations } from './backend/models/associations.js';  // Import the setupAssociations function
 
 const app = express();
 
-// Middleware til at parse JSON requests
+// Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// Brug CORS middleware
-app.use(cors()); // Dette vil tillade alle origins. 
+// Use CORS middleware
+app.use(cors()); // This will allow all origins.
 
-// Brug routes
+// Set up associations
+setupAssociations();
+
+// Use routes
 app.use('/artists', artistRouter);
 app.use('/albums', albumRouter);
 app.use('/tracks', trackRouter);
