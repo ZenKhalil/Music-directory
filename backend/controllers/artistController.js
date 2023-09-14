@@ -1,9 +1,20 @@
 import * as artistService from '../services/artistService.js';
+import { validationResult } from 'express-validator';
 
 export const getAllArtists = async (req, res, next) => {
     try {
         const artists = await artistService.getAllArtists();
         res.json(artists);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getAlbumsByArtist = async (req, res, next) => {
+    try {
+        const artistId = req.params.artistId;
+        const albums = await albumService.getAlbumsByArtist(artistId);
+        res.json(albums);
     } catch (error) {
         next(error);
     }
@@ -19,6 +30,11 @@ export const getArtistById = async (req, res, next) => {
 };
 
 export const createArtist = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const artist = await artistService.createArtist(req.body);
         res.status(201).json(artist);

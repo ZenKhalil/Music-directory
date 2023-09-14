@@ -2,8 +2,30 @@ import * as albumService from '../services/albumService.js';
 
 export const getAllAlbums = async (req, res, next) => {
     try {
-        const albums = await albumService.getAllAlbums();
+        const { sort, order, release_date, title, limit, offset } = req.query;
+
+        const whereClause = {};
+
+        if (release_date) {
+            whereClause.release_date = release_date;
+        }
+
+        if (title) {
+            whereClause.title = title;
+        }
+
+        const albums = await albumService.getAllAlbums(whereClause, sort, order, parseInt(limit), parseInt(offset));
         res.json(albums);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getTracksByAlbum = async (req, res, next) => {
+    try {
+        const albumId = req.params.albumId;
+        const tracks = await trackService.getTracksByAlbum(albumId);
+        res.json(tracks);
     } catch (error) {
         next(error);
     }

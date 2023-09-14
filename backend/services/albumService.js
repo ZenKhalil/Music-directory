@@ -3,8 +3,19 @@ import Artist from '../models/artistModel.js';
 import Track from '../models/trackModel.js';
 
 
-export const getAllAlbums = async () => {
-    return await Album.findAll();
+export const getAllAlbums = async (whereClause, sort, order, limit, offset) => {
+    return await Album.findAll({
+        where: whereClause,
+        order: [[sort || 'title', order || 'ASC']],
+        limit: limit,
+        offset: offset
+    });
+};
+
+export const getAlbumsByArtist = async (artistId) => {
+    return await Album.findAll({
+        where: { artist_id: artistId }
+    });
 };
 
 export const getAlbumById = async (id) => {

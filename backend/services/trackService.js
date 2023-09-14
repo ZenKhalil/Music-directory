@@ -4,6 +4,12 @@ export const getAllTracks = async () => {
     return await Track.findAll();
 };
 
+export const getTracksByAlbum = async (albumId) => {
+    return await Track.findAll({
+        where: { album_id: albumId }
+    });
+};
+
 export const getTrackById = async (id) => {
     return await Track.findById(id);
 };
