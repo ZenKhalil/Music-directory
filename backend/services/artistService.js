@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 
  const getAllArtists = async (queryParams) => {
     const page = parseInt(queryParams.page, 10) || 1; 
-    const limit = parseInt(queryParams.limit, 10) || 10; 
+    const limit = parseInt(queryParams.limit, 100) || 100; 
     const offset = (page - 1) * limit;
 
     const sort = queryParams.sort || 'name'; 

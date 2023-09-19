@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Directory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="content-wrapper">
+<nav>
+    <a href="#" id="home">Home</a>
+    <a href="#" id="artistsPage">Artists</a>
+    <a href="#" id="albumsPage">Albums</a>
+    <a href="#" id="tracksPage">All Tracks</a>
+    <a href="#" id="genrePage">Genre</a>
+    <a href="#" id="favoritesPage">Favorites</a>
+    <a href="#" id="aboutPage">About</a>
+</nav>
+<div id="content">
+    <!-- This is where the content will be dynamically loaded based on the page -->
+    <div id="artistForm">
+        <h3>Manage Artists</h3>
+        <input type="text" id="artistName" placeholder="Artist Name">
+        <select id="artistGenre">
+            <option value="rock">Rock</option>
+            <option value="pop">Pop</option>
+            <option value="jazz">Jazz</option>
+            <!-- Add more genres as needed -->
+        </select>
+        <button onclick="createArtist()">Add Artist</button>
+        <button onclick="updateArtist()">Update Artist</button>
+        <button onclick="deleteArtist()">Delete Artist</button>
+    </div>
+</div>
+
+    <footer>
+        <p>Music Directory &copy; 2023</p>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@ import Track from '../models/trackModel.js';
 
 export const getAllTracks = async (queryParams) => {
     const page = parseInt(queryParams.page, 10) || 1; 
-    const limit = parseInt(queryParams.limit, 10) || 10; 
+    const limit = parseInt(queryParams.limit, 200) || 200; 
     const offset = (page - 1) * limit;
 
     const sort = queryParams.sort || 'title'; 
@@ -48,7 +48,7 @@ export const deleteTrack = async (id) => {
 export const searchTracks = async (query) => {
     return await Track.findAll({
         where: {
-            name: {
+            title: {
                 [Op.like]: `%${query}%`
             }
         }

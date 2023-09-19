@@ -1,18 +1,24 @@
 import Album from '../models/albumModel.js';
 import Artist from '../models/artistModel.js';
 import Track from '../models/trackModel.js';
+import { Op } from 'sequelize';
 
 
-export const getAllAlbums = async (whereClause = {}, sort = 'title', order = 'ASC', limit = 10, offset = 0) => {
-    limit = isNaN(limit) ? 10 : limit;
+export const getAllAlbums = async (whereClause = {}, sort = 'title', order = 'ASC', limit = null, offset = 0) => {
+    limit = isNaN(limit) ? null : limit; // Adjusted this line
     offset = isNaN(offset) ? 0 : offset;
 
-    return await Album.findAll({
+    const queryOptions = {
         where: whereClause,
         order: [[sort, order]],
-        limit: limit,
         offset: offset
-    });
+    };
+
+    if (limit !== null) {
+        queryOptions.limit = limit;
+    }
+
+    return await Album.findAll(queryOptions);
 };
 
 export const getAlbumsByArtist = async (artistId) => {
@@ -50,7 +56,7 @@ export const deleteAlbum = async (id) => {
 export const searchAlbums = async (query) => {
     return await Album.findAll({
         where: {
-            name: {
+            title: {
                 [Op.like]: `%${query}%`
             }
         }

@@ -5,7 +5,7 @@ export const getAllAlbums = async (req, res, next) => {
         const { sort, order, release_date, title } = req.query;
         let { limit, offset } = req.query;
 
-        limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+        limit = isNaN(parseInt(limit)) ? null : parseInt(limit);
         offset = isNaN(parseInt(offset)) ? 0 : parseInt(offset);
 
         const whereClause = {};
