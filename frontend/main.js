@@ -26,12 +26,12 @@ document.getElementById('genrePage').addEventListener('click', navigateToGenrePa
 document.getElementById('favoritesPage').addEventListener('click', navigateToFavoritesPage);
 document.getElementById('aboutPage').addEventListener('click', navigateToAboutPage);
 
-// overlay
+// Overlay
 overlay.addEventListener('click', function() {
-    albumPopup.classList.remove('active');
-    overlay.classList.remove('active');
+    console.log("Overlay clicked!");
+albumPopup.style.display = 'none';
+overlay.style.display = 'none';
 });
-
 
 // Navigation Functions
 function navigateToHomePage(event) {
@@ -185,21 +185,23 @@ function displayTracks(tracks) {
 // Album Popup Functionality
 document.getElementById('content').addEventListener('click', async function(event) {
     if (event.target.closest('.album')) {
-        console.log("Album clicked!");
-
         const albumElement = event.target.closest('.album');
+        if (!albumElement) {
+            console.error("No album element found!");
+            return;
+        }
+        const albumId = albumElement.getAttribute('data-album-id'); // Extract albumId from the clicked element
+        console.log("Album clicked!");
+        console.log("Album ID:", albumId);
         const albumTitle = albumElement.querySelector('h2').innerText;
-        const albumId = albumElement.getAttribute('data-album-id');
-        const albumImage = 'path_to_image'; // Replace with the actual image path if available
-
         // Fetch tracks for the clicked album
         const tracks = await fetchTracksForAlbum(albumId);
+        console.log("Fetched tracks:", tracks);
 
         // Generate the tracks list
         const tracksList = tracks.map(track => `<li>${track.title}</li>`).join('');
 
         albumPopup.innerHTML = `
-            <img src="${albumImage}" alt="${albumTitle}">
             <div class="album-details">
                 <h2>${albumTitle}</h2>
                 <ul>
@@ -208,9 +210,10 @@ document.getElementById('content').addEventListener('click', async function(even
             </div>
         `;
 
-        // Display the popup and overlay
-        albumPopup.classList.add('active');
-        overlay.classList.add('active');
+// Display the popup and overlay
+albumPopup.style.display = 'block';
+overlay.style.display = 'block';
+
     }
 });
 
@@ -225,6 +228,7 @@ async function fetchTracksForAlbum(albumId) {
         return [];
     }
 }
+
 
 // CRUD and Search Functions
 // Create an artist
