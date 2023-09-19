@@ -4,6 +4,16 @@
 let artists = []; // Store fetched artist data
 let favorites = []; // Store user favorites
 
+// Create the album-popup and overlay divs
+const albumPopup = document.createElement('div');
+const overlay = document.createElement('div');
+
+albumPopup.classList.add('album-popup');
+overlay.classList.add('overlay');
+
+document.body.appendChild(albumPopup);
+document.body.appendChild(overlay);
+
 // Initial Setup
 navigateToHomePage();
 
@@ -15,6 +25,13 @@ document.getElementById('tracksPage').addEventListener('click', navigateToTracks
 document.getElementById('genrePage').addEventListener('click', navigateToGenrePage);
 document.getElementById('favoritesPage').addEventListener('click', navigateToFavoritesPage);
 document.getElementById('aboutPage').addEventListener('click', navigateToAboutPage);
+
+// overlay
+overlay.addEventListener('click', function() {
+    albumPopup.classList.remove('active');
+    overlay.classList.remove('active');
+});
+
 
 // Navigation Functions
 function navigateToHomePage(event) {
@@ -133,7 +150,7 @@ function displayAlbums(albums) {
     let html = '';
     albums.forEach(album => {
         html += `
-            <div class="album">
+            <div class="album" data-album-id="${album.id}">
                 <h2>${album.title}</h2>
                 <p>Release Date: ${album.release_date}</p>
                 <p>Artist ID: ${album.artist_id}</p>
@@ -166,48 +183,48 @@ function displayTracks(tracks) {
 }
 
 // Album Popup Functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const albums = document.querySelectorAll('.album');
-    const albumPopup = document.createElement('div');
-    const overlay = document.createElement('div');
+document.getElementById('content').addEventListener('click', async function(event) {
+    if (event.target.closest('.album')) {
+        console.log("Album clicked!");
 
-    albumPopup.classList.add('album-popup');
-    overlay.classList.add('overlay');
+        const albumElement = event.target.closest('.album');
+        const albumTitle = albumElement.querySelector('h2').innerText;
+        const albumId = albumElement.getAttribute('data-album-id');
+        const albumImage = 'path_to_image'; // Replace with the actual image path if available
 
-    document.body.appendChild(albumPopup);
-    document.body.appendChild(overlay);
-    
-albums.forEach(album => {
-    album.addEventListener('click', function() {
-        console.log("Album clicked!"); // Debugging line
+        // Fetch tracks for the clicked album
+        const tracks = await fetchTracksForAlbum(albumId);
 
-        const albumTitle = this.querySelector('h2').innerText;
-        console.log(albumTitle); // Debugging line
-
-        const albumImage = 'path_to_image'; // Replace with the actual image path
+        // Generate the tracks list
+        const tracksList = tracks.map(track => `<li>${track.title}</li>`).join('');
 
         albumPopup.innerHTML = `
             <img src="${albumImage}" alt="${albumTitle}">
             <div class="album-details">
                 <h2>${albumTitle}</h2>
                 <ul>
-                    <li>Song 1</li>
-                    <li>Song 2</li>
-                    <!-- Add more songs as needed -->
+                    ${tracksList}
                 </ul>
             </div>
         `;
 
+        // Display the popup and overlay
         albumPopup.classList.add('active');
         overlay.classList.add('active');
-    });
+    }
 });
 
-    overlay.addEventListener('click', function() {
-        albumPopup.classList.remove('active');
-        overlay.classList.remove('active');
-    });
-});
+// Fetch tracks for a specific album
+async function fetchTracksForAlbum(albumId) {
+    try {
+        const response = await fetch(`http://localhost:3006/albums/${albumId}/tracks`);
+        const tracks = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error('Error fetching tracks for album:', error);
+        return [];
+    }
+}
 
 // CRUD and Search Functions
 // Create an artist

@@ -23,7 +23,7 @@ export const getTracksByAlbum = async (albumId) => {
 };
 
 export const getTrackById = async (id) => {
-    return await Track.findById(id);
+    return await Track.findByPk(id);
 };
 
 export const createTrack = async (data) => {
@@ -31,7 +31,7 @@ export const createTrack = async (data) => {
 };
 
 export const updateTrack = async (id, data) => {
-    const track = await Track.findById(id);
+    const track = await Track.findByPk(id);
     if (!track) return null;
     Object.assign(track, data);
     await track.save();
@@ -39,7 +39,7 @@ export const updateTrack = async (id, data) => {
 };
 
 export const deleteTrack = async (id) => {
-    const track = await Track.findById(id);
+    const track = await Track.findByPk(id);
     if (!track) return null;
     await track.destroy();
     return track;
