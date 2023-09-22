@@ -64,9 +64,9 @@ nav a:hover {
 
 /* Artist Card Styles */
 .artist-image-container {
-    position: relative;
+  position: relative;
     width: 100%;
-    padding-top: 56.25%; /* 16:9 aspect ratio */
+    padding-bottom: 100%; /* 1:1 Aspect Ratio */
     background-color: #f0f0f0;
     overflow: hidden;
 }
@@ -100,16 +100,24 @@ nav a:hover {
     opacity: 1;
 }
 
-.play-btn {
-    background: #1DB954; /* Spotify green */
-    color: white;
+.return-icon.top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
     border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
+    font-size: 24px;
     cursor: pointer;
-    outline: none;
+}
+
+.album-details {
+    position: relative;  /* Make sure the parent div is relative */
+}
+
+.clickable-album-title {
+    cursor: pointer;
+    font-weight: bold;
+    color: #007bff; /* You can choose any color you like */
 }
 
 /* Artist Info Styles */
@@ -125,6 +133,41 @@ nav a:hover {
 .artist-info p {
     font-size: 14px;
     color: #777;
+}
+
+/* Artists Popup */
+.artist-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    display: none; /* Initially hidden */
+}
+
+.artist-popup.active {
+    display: block; /* Show when active */
+}
+
+.artist-details img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.artist-details h2,
+.artist-details p {
+    margin: 10px 0;
+}
+
+.artist-details ul {
+    list-style: none;
+    padding: 0;
 }
 
 /* Artist Actions (like website link, favorite button) */
@@ -147,7 +190,7 @@ nav a:hover {
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     z-index: 1002; /* Ensure it's above other elements */
-    display: none; /* Initially hidden */
+    visibility: hidden; /* Initially hidden */
     overflow: auto;
 }
 
@@ -194,6 +237,12 @@ nav a:hover {
     margin-bottom: 10px;
 }
 
+.album img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
 .overlay {
     position: fixed;
     top: 0;
@@ -201,8 +250,8 @@ nav a:hover {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1001; /* Ensure it's below the popup but above other page content */
-    display: none; /* Initially hidden */
+    z-index: 1000; /* Ensure it's below the popup but above other page content */
+    visibility: hidden;/* Initially hidden */
 }
 
 .overlay.active {
@@ -210,19 +259,20 @@ nav a:hover {
     visibility: visible;
 }
 
-@keyframes flipIn {
+@keyframes spinIn {
     0% {
-        transform: perspective(400px) rotateY(-90deg);
+        transform: perspective(400px) translate(-50%, -50%) rotateY(-180deg);
         opacity: 0;
     }
+ 
     100% {
-        transform: perspective(400px) rotateY(0);
+        transform: perspective(400px) translate(-50%, -50%) rotateY(0deg);
         opacity: 1;
     }
 }
 
 .album-popup.active {
-    animation: flipIn 0.5s forwards;
+    animation: spinIn 0.7s forwards; /* Reduced duration to 0.5s */
 }
 
 
@@ -249,4 +299,45 @@ footer {
     width: 100%;
     position: relative;
     bottom: 0;
+}
+
+
+.album-cover {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.track-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.track-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.track-number {
+    flex: 1;
+    text-align: left;
+}
+
+.track-title {
+    flex: 5;
+    text-align: left;
+}
+
+.track-duration {
+    flex: 1;
+    text-align: right;
+}
+
+.return-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
 }

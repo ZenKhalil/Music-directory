@@ -8,16 +8,20 @@ import { Op } from 'sequelize';
 
     const sort = queryParams.sort || 'name'; 
     const order = queryParams.order || 'ASC'; 
-
+    
     return await Artist.findAll({
-        order: [[sort, order]],
-        limit: limit,
-        offset: offset
-    });
+    attributes: ['id', 'name', 'biography'],
+    order: [[sort, order]],
+    limit: limit,
+    offset: offset
+});
+
 };
 
 const getArtistById = async (id) => {
-    return await Artist.findByPk(id);
+    return await Artist.findByPk(id, {
+        attributes: ['id', 'name', 'biography']  // Add this line
+    });
 };
 
 const createArtist = async (data) => {

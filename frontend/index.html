@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Directory</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 
 <body>
@@ -18,27 +19,48 @@
         <a href="#" id="favoritesPage">Favorites</a>
         <a href="#" id="aboutPage">About</a>
     </nav>
+    <div id="dynamicFormContainer"></div>
     <div id="content">
-        <!-- This is where the content will be dynamically loaded based on the page -->
-        <div id="artistForm">
-            <h3>Manage Artists</h3>
-            <input type="text" id="artistName" placeholder="Artist Name">
-            <select id="artistGenre">
-                <option value="rock">Rock</option>
-                <option value="pop">Pop</option>
-                <option value="jazz">Jazz</option>
-                <!-- Add more genres as needed -->
-            </select>
-            <button onclick="createArtist()">Add Artist</button>
-            <button onclick="updateArtist()">Update Artist</button>
-            <button onclick="deleteArtist()">Delete Artist</button>
+       <div id="artistButtonContainer"></div>
+        <div>
+            <button id="showCreateArtistFormButton">Create New Artist</button>
         </div>
     </div>
+    <!-- Genre Modal -->
+    <div id="genreModal" class="modal">
+        <div class="modal-content genre-modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="genre-content">
+            </div>
+        </div>
+    </div>
+    <!-- Create Artist Modal -->
+    <div id="createArtistModal" class="modal">
+        <div class="modal-content artist-modal-content">
+            <img src="./genre-icons/create.png" id="CreateArtist" alt="Create Artist"/>
+            <span class="close-btn-create">&times;</span>
+            <div id="create-artist-content">
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Artist Modal -->
+    <div id="editArtistModal" class="modal">
+        <div class="modal-content artist-modal-content">
+            <img src="" id="EditArtistImage" alt="Edit Artist"/>
+            <span class="close-btn-edit">&times;</span>
+            <div id="edit-artist-content">
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>Music Directory &copy; 2023</p>
     </footer>
 
-    <script src="main.js"></script>
+    <script type="module" src="main.js"></script>
+    <script type="module" src="modify.js"></script>
+
 </body>
 
 </html>
