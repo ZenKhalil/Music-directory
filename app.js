@@ -1,11 +1,12 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import path from 'path';
 
 import artistRouter from './backend/routes/artistRoutes.js';
 import albumRouter from './backend/routes/albumRoutes.js';
 import trackRouter from './backend/routes/trackRoutes.js';
-import { setupAssociations } from './backend/models/associations.js';  // Import the setupAssociations function
+import { setupAssociations } from './backend/models/associations.js';
 
 const app = express();
 
@@ -13,15 +14,23 @@ const app = express();
 app.use(bodyParser.json());
 
 // Use CORS middleware
-app.use(cors()); // This will allow all origins.
+app.use(cors());
 
 // Set up associations
 setupAssociations();
 
-// Use routes
+// Serve static files from the 'frontend' directory
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// Use routes for API
 app.use('/artists', artistRouter);
 app.use('/albums', albumRouter);
 app.use('/tracks', trackRouter);
+
+// Catch-all route to serve the frontend application
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
