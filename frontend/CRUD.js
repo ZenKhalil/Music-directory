@@ -5,7 +5,7 @@ let artists = [];
 // Create an artist
 function createArtist(name, genre, biography) {
     return new Promise((resolve, reject) => {
-        fetch('http://localhost:3006/artists', {
+        fetch('/artists', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ function updateArtist(id, name, genre, biography) {
     };
     console.log("Sending this data to server:", JSON.stringify(updatedArtist));
 
-    return fetch(`http://localhost:3006/artists/${id}`, {
+    return fetch(`/artists/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ function updateArtist(id, name, genre, biography) {
 // Delete an artist
 function deleteArtist(id) {
     return new Promise((resolve, reject) => {
-        fetch(`http://localhost:3006/artists/${id}`, {
+        fetch(`/artists/${id}`, {
             method: 'DELETE'
         })
         .then(response => {
@@ -88,7 +88,7 @@ function deleteArtist(id) {
 // Create an album
 function createAlbum(title, artistId, releaseDate) {
     console.log(`Creating album: ${title}, Artist ID: ${artistId}, Release Date: ${releaseDate}`);
-    fetch('http://localhost:3006/albums', {
+    fetch('/albums', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -115,7 +115,7 @@ function createAlbum(title, artistId, releaseDate) {
 // Update an album
 function updateAlbum(id, title, artistId, releaseDate) {
     console.log(`Updating album with ID ${id}: ${title}, Artist ID: ${artistId}, Release Date: ${releaseDate}`);
-    fetch(`http://localhost:3006/albums/${id}`, {
+    fetch(`/albums/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -142,7 +142,7 @@ function updateAlbum(id, title, artistId, releaseDate) {
 // Delete an album
 function deleteAlbum(id) {
     console.log(`Deleting album with ID ${id}`);
-    fetch(`http://localhost:3006/albums/${id}`, {
+    fetch(`/albums/${id}`, {
         method: 'DELETE'
     })
     .then(() => {
@@ -160,7 +160,7 @@ function deleteAlbum(id) {
 // Create a track
 function createTrack(title, albumId, duration) {
     console.log(`Creating track: ${title}, Album ID: ${albumId}, Duration: ${duration}`);
-    fetch('http://localhost:3006/tracks', {
+    fetch('/tracks', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -187,7 +187,7 @@ function createTrack(title, albumId, duration) {
 // Update a track
 function updateTrack(id, title, albumId, duration) {
     console.log(`Updating track with ID ${id}: ${title}, Album ID: ${albumId}, Duration: ${duration}`);
-    fetch(`http://localhost:3006/tracks/${id}`, {
+    fetch(`/tracks/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -214,7 +214,7 @@ function updateTrack(id, title, albumId, duration) {
 // Delete a track
 function deleteTrack(id) {
     console.log(`Deleting track with ID ${id}`);
-    fetch(`http://localhost:3006/tracks/${id}`, {
+    fetch(`/tracks/${id}`, {
         method: 'DELETE'
     })
     .then(() => {
