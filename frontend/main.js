@@ -212,7 +212,7 @@ async function navigateToArtistsPage(event, isInitialLoad = true) {
 
 async function searchAndUpdateArtists(query) {
     try {
-        const response = await fetch(`http://localhost:3006/artists/search?q=${query}`);
+        const response = await fetch(`/artists/search?q=${query}`);
         const data = await response.json();
         const artistHTML = displayArtists(data);
         const contentDiv = document.getElementById('artists');
@@ -387,7 +387,7 @@ function setupPageContent(sectionId, placeholderText) {
 
 // Fetch and Display Functions
 function fetchAlbums() {
-    return fetch('http://localhost:3006/albums')
+    return fetch('/albums')
     .then(response => response.json())
     .then(data => {
         albums = data;
@@ -397,20 +397,20 @@ function fetchAlbums() {
 }
 
 function fetchTracks() {
-    fetch('http://localhost:3006/tracks')
+    fetch('/tracks')
         .then(response => response.json())
         .then(tracks => displayTracks(tracks))
         .catch(error => console.error('Error fetching tracks:', error));
 }
 
 async function fetchTracksForAlbum(albumId) {
-    const response = await fetch(`http://localhost:3006/albums/${albumId}/tracks`);
+    const response = await fetch(`/albums/${albumId}/tracks`);
     const tracks = await response.json();
     return tracks;
 }
 
 function fetchArtists() {
-    return fetch('http://localhost:3006/artists')
+    return fetch('/artists')
         .then(response => response.json())
         .then(data => {
             artists = data.map(artist => ({
@@ -681,21 +681,21 @@ document.getElementById('content').addEventListener('click', async function(even
 
 // Search functions for each section
 function searchArtists(query) {
-    fetch(`http://localhost:3006/artists/search?q=${query}`)
+    fetch(`/artists/search?q=${query}`)
         .then(response => response.json())
         .then(data => displayArtists(data))
         .catch(error => console.error('Error searching artists:', error));
 }
 
 function searchAlbums(query) {
-    fetch(`http://localhost:3006/albums/search?q=${query}`)
+    fetch(`/albums/search?q=${query}`)
         .then(response => response.json())
         .then(data => displayAlbums(data))
         .catch(error => console.error('Error searching albums:', error));
 }
 
 function searchTracks(query) {
-    fetch(`http://localhost:3006/tracks/search?q=${query}`)
+    fetch(`/tracks/search?q=${query}`)
         .then(response => response.json())
         .then(data => displayTracks(data))
         .catch(error => console.error('Error searching tracks:', error));
