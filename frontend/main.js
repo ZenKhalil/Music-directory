@@ -28,6 +28,7 @@ window.addEventListener('load', function() {
 let artists = []; // Store fetched artist data
 let albums = []; // store fetched album data
 let genre = [];
+let homePageInterval; // Declare a variable to store the interval ID
 let isNavigatingToGenrePage = false;
 let lastViewedArtist = null; 
 window.deleteArtists = deleteArtists;
@@ -132,12 +133,6 @@ function navigateToHomePage(event) {
   removeCreateArtistButton();
   if (event) event.preventDefault();
   const contentDiv = document.getElementById('content');
-  const footer = document.getElementsByTagName('footer')[0]; // Select the first footer element
-    
-  // Hide the footer
-  if (footer) {
-    footer.style.display = 'none';
-  }
 
   contentDiv.classList.add('home-page-body');
   contentDiv.classList.remove('favorites-page');
@@ -149,25 +144,41 @@ function navigateToHomePage(event) {
   `;
 
   let toggleText = true;
-  setInterval(() => {
+  // Clear any existing interval
+  if (homePageInterval) {
+    clearInterval(homePageInterval);
+  }
+  homePageInterval = setInterval(() => {
     const animatedText = document.getElementById('animatedText');
-    if (toggleText) {
-      animatedText.innerText = "TO MUSIC DIRECTORY!";
-    } else {
-      animatedText.innerText = "WELCOME...";
+    if (animatedText) { // Check if the element exists
+      if (toggleText) {
+        animatedText.innerText = "TO MUSIC DIRECTORY!";
+      } else {
+        animatedText.innerText = "WELCOME...";
+      }
+      toggleText = !toggleText;
     }
-    toggleText = !toggleText;
   }, 5000);
 }
 
+// Add this function to clear the interval when navigating away from the home page
+function clearHomePageInterval() {
+  if (homePageInterval) {
+    clearInterval(homePageInterval);
+  }
+}
 
 
-async function navigateToArtistsPage(event) {
+async function navigateToArtistsPage(event, isInitialLoad = true) {
     document.getElementById('content').classList.remove('favorites-page');
     sessionStorage.setItem('lastTab', 'artists');
     addCreateArtistButton();
     if (event) event.preventDefault();
-    setupPageContent('artists', 'Search for artists...');
+
+    // Only set up the search bar and content if it's the initial load
+    if (isInitialLoad) {
+        setupPageContent('artists', 'Search for artists...');
+    }
 
     // Fetch artists and wait for it to complete
     await fetchArtists();
@@ -177,16 +188,40 @@ async function navigateToArtistsPage(event) {
 
     // Insert the generated HTML into the DOM
     const contentDiv = document.getElementById('artists');
-    contentDiv.innerHTML = `
-        ${artistHTML}
-    `;
+    contentDiv.innerHTML = artistHTML;
 
     // Add event listener to the "Create Artist" button
-    const createArtistButton = document.getElementById('create-artist-button'); // Assuming you have a button with this ID
+    const createArtistButton = document.getElementById('create-artist-button');
     if (createArtistButton) {
         createArtistButton.addEventListener('click', showCreateArtistModal);
     }
+
+    // Ensure the search bar event listener is set up correctly
+    const searchBar = document.getElementById('searchBar');
+    if (searchBar) {
+        searchBar.addEventListener('input', function() {
+            const query = this.value;
+            if (query) {
+                searchAndUpdateArtists(query);
+            } else {
+                navigateToArtistsPage(null, false); // Call with isInitialLoad set to false
+            }
+        });
+    }
 }
+
+async function searchAndUpdateArtists(query) {
+    try {
+        const response = await fetch(`http://localhost:3006/artists/search?q=${query}`);
+        const data = await response.json();
+        const artistHTML = displayArtists(data);
+        const contentDiv = document.getElementById('artists');
+        contentDiv.innerHTML = artistHTML;
+    } catch (error) {
+        console.error('Error searching artists:', error);
+    }
+}
+
 
 document.querySelector('.close-btn-create').addEventListener('click', function() {
     document.getElementById('createArtistModal').style.display = 'none';

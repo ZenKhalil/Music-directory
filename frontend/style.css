@@ -665,7 +665,7 @@ footer p {
 .home-heading {
   font-size: 3rem;
   margin-bottom: 1rem;
-  animation: fadeInOut 10s infinite;
+  animation: fadeInOut 8s infinite;
 }
 
 .home-text {
@@ -680,10 +680,13 @@ footer p {
   }
   20% {
     opacity: 1;
-    content: "WELCOME...";
   }
-  35%, 65% {
+  35%, 45% {
     opacity: 0;
+  }
+   50%, 65% {
+    opacity: 1;
+    content: "TO MUSIC DIRECTORY!";
   }
   85% {
     opacity: 1;
