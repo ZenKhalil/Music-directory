@@ -76,18 +76,13 @@ document.body.appendChild(overlay);
 
 // To hide the popup and overlay
 overlay.addEventListener('click', function(event) {
-    console.log("Overlay event triggered");  // Debugging line
-    console.log("Event target:", event.target);  // Debugging line
-    console.log("Overlay element:", overlay);  // Debugging line
 
     if (event.target === overlay) {
-        console.log("Overlay clicked!");  // Debugging line
         albumPopup.classList.remove('active');
         overlay.classList.remove('active');
         artistPopup.classList.remove('active');
         document.getElementById('genreModal').style.display = 'none';  // Close the genre modal as well
     } else {
-        console.log("Clicked inside the modal, not the overlay");  // Debugging line
     }
 });
 
@@ -125,7 +120,6 @@ function removeCreateArtistButton() {
 
 // To hide the popup and overlay
 overlay.addEventListener('click', function() {
-    console.log("Overlay clicked!");
     albumPopup.classList.remove('active');
     overlay.classList.remove('active');
     artistPopup.classList.remove('active');
@@ -134,16 +128,39 @@ overlay.addEventListener('click', function() {
 
 // Navigation Functions
 function navigateToHomePage(event) {
-    sessionStorage.setItem('lastTab', 'home');
-    removeCreateArtistButton();
-    if (event) event.preventDefault();
-    const contentDiv = document.getElementById('content');
-    document.getElementById('content').classList.remove('favorites-page');
-    contentDiv.innerHTML = `
-        <h1>Welcome to Music Directory</h1>
-        <p>Explore artists, albums, and tracks.</p>
-    `;
+  sessionStorage.setItem('lastTab', 'home');
+  removeCreateArtistButton();
+  if (event) event.preventDefault();
+  const contentDiv = document.getElementById('content');
+  const footer = document.getElementsByTagName('footer')[0]; // Select the first footer element
+    
+  // Hide the footer
+  if (footer) {
+    footer.style.display = 'none';
+  }
+
+  contentDiv.classList.add('home-page-body');
+  contentDiv.classList.remove('favorites-page');
+  contentDiv.innerHTML = `
+    <div class="home-container">
+      <h1 id="animatedText" class="home-heading">WELCOME...</h1>
+      <p class="home-text">Explore artists, albums, and tracks.</p>
+    </div>
+  `;
+
+  let toggleText = true;
+  setInterval(() => {
+    const animatedText = document.getElementById('animatedText');
+    if (toggleText) {
+      animatedText.innerText = "TO MUSIC DIRECTORY!";
+    } else {
+      animatedText.innerText = "WELCOME...";
+    }
+    toggleText = !toggleText;
+  }, 5000);
 }
+
+
 
 async function navigateToArtistsPage(event) {
     document.getElementById('content').classList.remove('favorites-page');
@@ -195,7 +212,6 @@ function navigateToTracksPage(event) {
 
 // Få en unik liste over genrer
 function getUniqueGenres() {
-    console.log("getUniqueGenres called");
     const genres = new Set();
     artists.forEach(artist => {
         if (artist.genres) {  // Check if artist.genres is defined
@@ -276,16 +292,33 @@ function navigateToFavoritesPage(event) {
 
 
 function navigateToAboutPage(event) {
-    sessionStorage.setItem('lastTab', 'about');
-    removeCreateArtistButton();
-    if (event) event.preventDefault();
-    const contentDiv = document.getElementById('content');
-    document.getElementById('content').classList.remove('favorites-page');
-    contentDiv.innerHTML = `
-        <h2>About Music Directory</h2>
-        <p>This is a platform to explore various artists, their albums, and tracks. Dive into the world of music and discover something new today!</p>
-    `;
+  sessionStorage.setItem('lastTab', 'about');
+  removeCreateArtistButton();
+  if (event) event.preventDefault();
+  const contentDiv = document.getElementById('content');
+  document.getElementById('content').classList.remove('favorites-page');
+  contentDiv.innerHTML = `
+    <div class="about-container">
+      <h2 class="about-heading">About Music Directory</h2>
+      <p class="about-text">
+        Welcome to Music Directory, your one-stop platform for all things music! Whether you're a casual listener or a dedicated audiophile, our platform offers a comprehensive database of artists, albums, and tracks that will surely pique your interest.
+      </p>
+      <hr class="about-divider">
+      <p class="about-text">
+        With Music Directory, you can explore a wide range of genres, from the classics to the latest hits. Our user-friendly interface allows you to easily navigate through artist biographies, album details, and individual tracks. You can even mark your favorite artists and come back to them anytime!
+      </p>
+      <hr class="about-divider">
+      <p class="about-text">
+        What sets us apart is our commitment to providing a seamless and enriching user experience. Our platform is constantly updated to include new releases and trending artists. Plus, our search functionality ensures that you find exactly what you're looking for in no time.
+      </p>
+      <hr class="about-divider">
+      <p class="about-text">
+        So why wait? Dive into the world of music and discover something new today with Music Directory!
+      </p>
+    </div>
+  `;
 }
+
 
 // Utility Functions
 function setupPageContent(sectionId, placeholderText) {
@@ -379,7 +412,6 @@ function createGenreModal() {
     document.body.appendChild(modal);
 
 document.getElementById('genreModal').addEventListener('click', function(event) {
-    console.log("Clicked on overlay");
     if (event.target === this || event.target.className === 'close-btn') {
         this.style.display = 'none';
     }
@@ -388,7 +420,6 @@ document.getElementById('genreModal').addEventListener('click', function(event) 
 }
 
 function showGenreModal(event) {
-    console.log("showGenreModal called");
     isNavigatingToGenrePage = false; // Set the flag to false
     showGenre(); // Populate the modal with genres
     document.getElementById('genreModal').style.display = 'block';
@@ -396,7 +427,6 @@ function showGenreModal(event) {
 }
 
 function showGenre(event) {
-    console.log("showGenre called");
     if(event) event.preventDefault();
     const uniqueGenres = getUniqueGenres();
 
@@ -439,7 +469,6 @@ async function showArtistsByGenre(genre) {
     `;
 
     if (genrePageDiv) {
-        console.log("Artists before filtering:", artists);
          const filteredArtists = artists.filter(artist => {
         return artist.genres && artist.genres.includes(genre); // Add this check
     });
@@ -522,7 +551,6 @@ document.getElementById('showAlbums').addEventListener('change', function() {
 const genreTabElement = document.getElementById('genrePage');
 if (genreTabElement) {
     genreTabElement.addEventListener('click', function() {
-        console.log("Genre tab clicked");
         
         // Set the flag variable based on your condition
         isNavigatingToGenrePage = false;
@@ -536,16 +564,13 @@ if (genreTabElement) {
 
 function displayAlbums(albums) {
     const albumContainer = document.getElementById('albums');
-    console.log(document.getElementById('albums'));  // Debugging line
     if (!albumContainer) {
         console.error('Element with id "albums" not found');
         return;
     }
     
     let html = '';
-    console.log("Artists array:", artists);  // Debugging line
     albums.forEach(album => {
-        console.log("Current album's artist_id:", album.artist_id);  // Debugging line
         const artist = artists.find(a => a.id === album.artist_id);
         const artistName = artist ? artist.name : 'Unknown Artist';
         
@@ -712,7 +737,6 @@ document.getElementById('content').addEventListener('click', function(event) {
 
 async function displayArtistPopup(artist) {
     lastViewedArtist = artist; // Store the artist being viewed
-    console.log("Artist in Popup:", artist);  // Debugging line
 
     // Fetch albums if not already fetched
     if (!albums.length) {
@@ -721,13 +745,10 @@ async function displayArtistPopup(artist) {
 
     // Filter albums that belong to the artist
     const albumsOfArtist = albums.filter(album => album.artist_id === artist.id);
-    console.log("Albums of Artist:", albumsOfArtist);  // Debugging line
 
     // Generate the album titles
     const albumTitles = albumsOfArtist.map(album => `
     <li data-album-id="${album.id}" class="clickable-album-title">${album.title}</li>`).join('');
-
-    console.log("Album Titles:", albumTitles);  // Debugging line
 
     artistPopup.innerHTML = `
         <div class="artist-details">

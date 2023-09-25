@@ -11,8 +11,6 @@ export function showCreateArtistModal(event) {
     if(event) event.preventDefault();
      const uniqueGenres = getUniqueGenres();
 
-     console.log("showCreateArtistModal called");
-
 const genreBobbles = uniqueGenres.map(genre => `
     <div class="genre-label" data-genre="${genre}" onclick="toggleGenreSelection(this)">
         <span>${genre}</span>
@@ -60,15 +58,12 @@ const genreBobbles = uniqueGenres.map(genre => `
     modalContainer.style.display = 'block';
 
     // Add event listener for form submission
-    console.log("Attaching submit event listener");
     document.getElementById('create-artist-form').addEventListener('submit', handleCreateArtistFormSubmission);
 
 // Add event listener to close the modal when clicking outside of it
 modalContainer.addEventListener('click', function(event) {
-    console.log("Modal container clicked");
     const formElement = document.getElementById('create-artist-form');
     if (!formElement.contains(event.target)) {
-        console.log("Closing modal");
         modalContainer.style.display = 'none';
         document.body.removeChild(modalContainer);
     }
