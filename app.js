@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import path from 'path';
 
 import artistRouter from './backend/routes/artistRoutes.js';
 import albumRouter from './backend/routes/albumRoutes.js';
@@ -20,7 +19,7 @@ app.use(cors());
 setupAssociations();
 
 // Serve static files from the 'frontend' directory
-app.use(express.static(path.join(__dirname, 'frontend')));
+app.use(express.static('frontend'));
 
 // Use routes for API
 app.use('/artists', artistRouter);
@@ -29,7 +28,7 @@ app.use('/tracks', trackRouter);
 
 // Catch-all route to serve the frontend application
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+    res.sendFile('frontend/index.html');
 });
 
 // Error handling middleware
@@ -38,7 +37,7 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
-const PORT = process.env.PORT || 3006;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
