@@ -12,10 +12,16 @@ const Artist = sequelize.define('Artist', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  // Tilføj evt. flere felter her.
+  genres: {
+    type: DataTypes.STRING,
+    allowNull: true  // Set to true if you want to allow artists without a genre
+  },
+  biography: { 
+    type: DataTypes.TEXT,  // TEXT type for longer strings
+    allowNull: true  // Set to true if you want to allow artists without a biography
+  },
 }, {
-  timestamps: true,  // Dette tilføjer created_at og updated_at felter i databasen.
-  tableName: 'artists',  // Navnet på tabellen i databasen.
+  timestamps: true,  // This adds created_at and updated_at fields in the database.
+  tableName: 'artists',  // The name of the table in the database.
 });
-
 export default Artist;

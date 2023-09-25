@@ -1,79 +1,97 @@
-import {
-  createArtist,
-  updateArtist,
-  deleteArtist,
-  createAlbum,
-  updateAlbum,
-  deleteAlbum,
-  createTrack,
-  updateTrack,
-  deleteTrack
-} from './modify.js';
+import { createArtist, updateArtist } from './CRUD.js';
+import { getUniqueGenres, fetchArtists } from './main.js';
 
-// Få en unik liste over genrer
-function getUniqueGenres() {
-    const genres = new Set();
-    artists.forEach(artist => {
-        artist.genres.forEach(genre => {
-            genres.add(genre);
-        });
-    });
-    return [...genres];
-}
 
-// Vis genrer i modal
-function showGenre(event) {
+window.toggleGenreSelection = function(element) {
+    element.classList.toggle('selected');
+};
+
+// Function to show the "Create Artist" form
+export function showCreateArtistModal(event) {
     if(event) event.preventDefault();
-    const uniqueGenres = getUniqueGenres();
+     const uniqueGenres = getUniqueGenres();
 
-let genreListHTML = '';
-uniqueGenres.forEach((genre, index) => {
-    if (index % 5 === 0) genreListHTML += `<div class="genre-row">`; // Begin a new row every 5 items
+     console.log("showCreateArtistModal called");
 
-    genreListHTML += `<div class="genre-icon" onclick="showArtistsByGenre('${genre}')">
-        <img src="/images/genre-icons/${genre}.png" alt="${genre}"> 
-        <p>${genre}</p>
-    </div>`;
+const genreBobbles = uniqueGenres.map(genre => `
+    <div class="genre-label" data-genre="${genre}" onclick="toggleGenreSelection(this)">
+        <span>${genre}</span>
+    </div>
+`).join('');
 
-    if ((index + 1) % 5 === 0 || index === uniqueGenres.length - 1) genreListHTML += `</div>`; // End the row
+    const formHTML =  `
+         <form id="create-artist-form">
+            <img src="./genre-icons/create.png" id="CreateArtist" alt="Create Artist"/> <!-- Include the image here -->
+            <h1 id="createText">Create New Artist</h1> 
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label>Genres:</label>
+            <div id="genres-bobbles">
+                ${genreBobbles}
+            </div>
+            <label>Image:</label>
+            <div>
+                <input type="radio" id="uploadImage" name="imageSource" value="upload" checked>
+                <label for="uploadImage">Upload</label>
+                <input type="radio" id="imageLink" name="imageSource" value="link">
+                <label for="imageLink">Link</label>
+            </div>
+            <input type="file" id="imageUpload" accept="image/*">
+            <input type="text" id="imageLinkInput" placeholder="Image Link" style="display: none;">
+            <label for="biography">Biography:</label>
+            <textarea id="biography" required></textarea>
+            <button type="submit">Create Artist</button>
+        </form>
+    `;
+
+// Create the modal and content containers
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'createArtistModal';
+    modalContainer.classList.add('create-artist-modal');
+    const modalContent = document.createElement('div');
+    modalContent.id = 'create-artist-content';
+    modalContent.innerHTML = formHTML;
+
+    // Append everything
+    modalContainer.appendChild(modalContent);
+    document.body.appendChild(modalContainer);
+
+    // Display the modal
+    modalContainer.style.display = 'block';
+
+    // Add event listener for form submission
+    console.log("Attaching submit event listener");
+    document.getElementById('create-artist-form').addEventListener('submit', handleCreateArtistFormSubmission);
+
+// Add event listener to close the modal when clicking outside of it
+modalContainer.addEventListener('click', function(event) {
+    console.log("Modal container clicked");
+    const formElement = document.getElementById('create-artist-form');
+    if (!formElement.contains(event.target)) {
+        console.log("Closing modal");
+        modalContainer.style.display = 'none';
+        document.body.removeChild(modalContainer);
+    }
 });
-    document.getElementById('genre-content').innerHTML = genreListHTML;
-    document.getElementById('genreModal').style.display = "block";
 }
 
-// Vis kunstnere baseret på genre
-function showArtistsByGenre(genre) {
-    const contentDiv = document.getElementById('content');
-    currentGenre = genre; 
-    const filteredArtists = artists.filter(artist => artist.genres.includes(genre));
-    let artistListHTML = `<h1 class="genre">${genre}</h1>`;
-    filteredArtists.forEach(artist => {
-        artistListHTML += `
-            <div class="artist-card">
-                <img src="/images/${artist.image}" alt="${artist.name}">
-                <h3>${artist.name}</h3>
-                <p>${artist.biography}</p>
-                <button onclick="toggleFavorite(${artist.id})">${favorites.includes(artist.id) ? 'Remove from Favorites' : 'Add to Favorites'}</button>
-            </div>`;
-    });
-   contentDiv.innerHTML = artistListHTML;
-    history.pushState({ view: 'genre', genre: genre }, '', '/genre/' + genre);
-    document.getElementById('genreModal').style.display = "none";
+// Add this function to your JavaScript file
+function toggleGenreSelection(element) {
+    element.classList.toggle('selected');
 }
 
-function handleCreateArtistFormSubmission(event) {
+// Function to handle form submission
+async function handleCreateArtistFormSubmission(event) {
     event.preventDefault();
-    
+    console.log("handleCreateArtistFormSubmission called");
+
     const newArtist = {
         name: document.getElementById('name').value,
-        birthdate: document.getElementById('birthdate').value,
-        activeSince: document.getElementById('activeSince').value,
         genres: Array.from(document.querySelectorAll('input[name="genres"]:checked')).map(checkbox => checkbox.value),
-        labels: document.getElementById('labels').value.split(',').map(s => s.trim()),
-        website: document.getElementById('website').value,
         image: '', // Initialize image as an empty string
-        shortDescription: document.getElementById('shortDescription').value
+        biography: document.getElementById('biography').value
     };
+
     // Check which image source option is selected
     const uploadImageRadio = document.getElementById('uploadImage');
     if (uploadImageRadio.checked) {
@@ -81,61 +99,175 @@ function handleCreateArtistFormSubmission(event) {
         const imageFile = document.getElementById('imageUpload').files[0];
         if (imageFile) {
             newArtist.image = imageFile.name;
+
+            // Read the image file and store it in localStorage
+            const reader = new FileReader();
+            reader.readAsDataURL(imageFile);
+            reader.onloadend = function() {
+                const base64Image = reader.result.split(',')[1];
+                localStorage.setItem(`artistImage_${newArtist.name}`, base64Image);
+            };
+            reader.onerror = function(error) {
+                console.error('Error reading file:', error);
+            };
         }
     } else {
         // Handle image link
         newArtist.image = document.getElementById('imageLinkInput').value;
     }
 
-    // Function from rest-service.js to create the artist.
-    createNewArtist(newArtist)
-        .then(artist => {
-            artists.push(artist);
-            showArtists();
+    try {
+        // Call the createArtist function from CRUD.js
+        await createArtist(newArtist.name, newArtist.genres.join(','), newArtist.biography);  // Assuming genre is a comma-separated string
 
-            document.getElementById('createArtistModal').style.display = "none";
-            alert('Artist has been created :)');
-        })
-        .catch(error => {
-            console.error("Error adding artist:", error);
-            alert('There was an issue adding the artist. Please try again.');
+        // Refresh the artists list
+        await fetchArtists();
+
+        // Close the modal
+        const modals = document.querySelectorAll('#createArtistModal');
+        console.log("Number of modals in DOM before removal: ", modals.length);
+        
+        modals.forEach((modal) => {
+            modal.style.display = "none";
+            document.body.removeChild(modal);
         });
+
+        console.log("Number of modals in DOM after removal: ", document.querySelectorAll('#createArtistModal').length);
+        
+        // Show success alert
+        alert('Artist has been created :)');
+        
+        // Optionally, you can refresh the page
+        // location.reload();
+    } catch (error) {
+        // Show error alert
+        alert('Failed to create artist :(');
+        console.error('Error creating artist:', error);
+    }
 }
 
-document.getElementById('showCreateArtistFormButton').addEventListener('click', showCreateArtistForm);
 
-function showCreateArtistForm(event) {
-  if(event) event.preventDefault();
-  
-  // Assuming you have a function getUniqueGenres() that returns an array of unique genres
-  const uniqueGenres = getUniqueGenres(); 
 
-  const genreBobbles = uniqueGenres.map(genre => `
-      <input type="checkbox" id="genre-${genre}" name="genres" value="${genre}">
-      <label class="genre-bobble" for="genre-${genre}">
-          <span>${genre}</span>
-      </label>
-  `).join('');
+// Function to show the "Edit Artist" form
+export function showEditArtistModal(artist) {
+    const uniqueGenres = getUniqueGenres();
 
-  const formHTML =  `
-      <h1 id="createText">Create New Artist</h1>
-      <form id="create-artist-form">
-          <label for="name">Name:</label>
-          <input type="text" id="name" required>
-          <!-- Add other fields here -->
-          <label>Genres:</label>
-          <div id="genres-bobbles">
-              ${genreBobbles}
-          </div>
-          <button type="submit">Create Artist</button>
-      </form>
-  `;
+    const genreBobbles = uniqueGenres.map(genre => `
+        <div class="genre-label" data-genre="${genre}" onclick="toggleGenreSelection(this)">
+            <span>${genre}</span>
+        </div>
+    `).join('');
 
-  document.getElementById('dynamicFormContainer').innerHTML = formHTML;
+    const formHTML = `
+        <form id="edit-artist-form">
+            <img src="./artists/${artist.id}.jpg" id="EditArtistImage" alt="Edit Artist"/>
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label>Genres:</label>
+            <div id="genres-bobbles">
+                ${genreBobbles}
+            </div>
+            <label>Image:</label>
+            <div>
+                <input type="radio" id="uploadImage" name="imageSource" value="upload" checked>
+                <label for="uploadImage">Upload</label>
+                <input type="radio" id="imageLink" name="imageSource" value="link">
+                <label for="imageLink">Link</label>
+            </div>
+            <input type="file" id="imageUpload" accept="image/*">
+            <input type="text" id="imageLinkInput" placeholder="Image Link" style="display: none;">
+            <label for="biography">Biography:</label>
+            <textarea id="biography" required></textarea>
+            <button type="submit">Update Artist</button>
+        </form>
+    `;
 
-  // Add event listener for form submission
-  document.getElementById('create-artist-form').addEventListener('submit', function(event) {
+    // Create the modal and content containers
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'editArtistModal';
+    modalContainer.classList.add('edit-artist-modal');
+    const modalContent = document.createElement('div');
+    modalContent.id = 'edit-artist-content';
+    modalContent.innerHTML = formHTML;
+
+    // Append everything
+    modalContainer.appendChild(modalContent);
+    document.body.appendChild(modalContainer);
+
+    // Display the modal
+    modalContainer.style.display = 'block';
+
+    // Populate the form fields with the existing artist data
+    document.getElementById('name').value = artist.name || '';
+    document.getElementById('biography').textContent = artist.biography || '';
+
+   // Handle genres (assuming genres is a comma-separated string)
+    if (artist.genres) {
+        const artistGenres = artist.genres.split(', '); // Convert the string to an array
+        artistGenres.forEach(genre => {
+            const genreElement = document.querySelector(`.genre-label[data-genre="${genre}"]`);
+            if (genreElement) {
+                genreElement.classList.add('selected');
+            }
+        });
+    }
+
+    // Add event listener for form submission
+    document.getElementById('edit-artist-form').addEventListener('submit', function(event) {
+        handleEditArtistFormSubmission(event, artist.id);
+    });
+
+    // Add event listener to close the modal when clicking outside of it
+    modalContainer.addEventListener('click', function(event) {
+        const formElement = document.getElementById('edit-artist-form');
+        if (!formElement.contains(event.target)) {
+            modalContainer.style.display = 'none';
+            document.body.removeChild(modalContainer);
+        }
+    });
+}
+
+// Function to handle form submission for editing an artist
+function handleEditArtistFormSubmission(event, artistId) {
     event.preventDefault();
-    // Your code to handle form submission, e.g., createArtist()
-  });
+
+    const name = document.getElementById('name').value;
+    const genres = Array.from(document.querySelectorAll('.genre-label.selected')).map(element => element.getAttribute('data-genre')).join(', ');
+    const biography = document.getElementById('biography').value;
+    let image = ''; // Initialize image as an empty string
+
+    // Check which image source option is selected
+    const uploadImageRadio = document.getElementById('uploadImage');
+    if (uploadImageRadio.checked) {
+        // Handle image upload
+        const imageFile = document.getElementById('imageUpload').files[0];
+        if (imageFile) {
+            image = imageFile.name;
+        }
+    } else {
+        // Handle image link
+        image = document.getElementById('imageLinkInput').value;
+    }
+
+    // Call the updateArtist function from CRUD.js
+    updateArtist(artistId, name, genres, biography)
+        .then(() => {
+            // Close the modal
+            const modal = document.getElementById('editArtistModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.removeChild(modal);
+            }
+
+            // Show a success alert
+            alert('Artist has been updated successfully.');
+
+            // Refresh the artist list
+            fetchArtists();  // This function should re-fetch the artists and update the UI
+        })
+        .catch((error) => {
+            // Handle error, e.g., show an error message
+            alert('Failed to update artist.');
+            console.error('Error updating artist:', error);
+        });
 }

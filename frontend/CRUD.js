@@ -1,40 +1,48 @@
+import { displayArtists, displayAlbums, displayTracks } from './main.js';
+
+let artists = [];
 
 // Create an artist
-function createArtist(name, genre) {
-        console.log("Creating artist with name:", name, "and genre:", genre); // Add this line
-    fetch('http://localhost:3006/artists', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: name,
-            genre: genre
+function createArtist(name, genre, biography) {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3006/artists', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                genre: genre,
+                biography: biography
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-         console.log("Artist created:", data); 
-        artists.push(data);
-        displayArtists(artists);
-    })
-.catch(error => {
-        console.error('Error creating artist:', error);
-        console.log("Failed to create artist with name:", name, "and genre:", genre); // Add this line
+        .then(response => response.json())
+        .then(data => {
+            console.log("Artist creation successful");
+            resolve(data);
+        })
+        .catch(error => {
+            console.log("Artist creation failed");
+            reject(error);
+        });
     });
 }
 
 // Update an artist
-function updateArtist(id, name, genre) {
-    fetch(`http://localhost:3006/artists/${id}`, {
+function updateArtist(id, name, genre, biography) {
+    const updatedArtist = {
+        name: name,
+        genre: genre,
+        biography: biography
+    };
+    console.log("Sending this data to server:", JSON.stringify(updatedArtist));
+
+    return fetch(`http://localhost:3006/artists/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            name: name,
-            genre: genre
-        })
+        body: JSON.stringify(updatedArtist)
     })
     .then(response => response.json())
     .then(data => {
@@ -44,20 +52,34 @@ function updateArtist(id, name, genre) {
             displayArtists(artists);
         }
     })
-    .catch(error => console.error('Error updating artist:', error));
+    .catch(error => {
+        console.error('Error updating artist:', error);
+        throw error;
+    });
 }
 
 
 // Delete an artist
 function deleteArtist(id) {
-    fetch(`http://localhost:3006/artists/${id}`, {
-        method: 'DELETE'
-    })
-    .then(() => {
-        artists = artists.filter(artist => artist.id !== id);
-        displayArtists(artists);
-    })
-    .catch(error => console.error('Error deleting artist:', error));
+    return new Promise((resolve, reject) => {
+        fetch(`http://localhost:3006/artists/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                // Assuming artists is accessible here
+                artists = artists.filter(artist => artist.id !== id);
+                displayArtists(artists);
+                resolve(); // Resolve the promise
+            } else {
+                reject('Failed to delete artist'); // Reject the promise if the fetch failed
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting artist:', error);
+            reject(error); // Reject the promise if there was an error
+        });
+    });
 }
 
 
@@ -203,6 +225,7 @@ function deleteTrack(id) {
         console.error('Error deleting track:', error);
     });
 }
+
 
 // Export block
 export {

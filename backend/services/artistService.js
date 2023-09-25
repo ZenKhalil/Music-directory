@@ -10,7 +10,7 @@ import { Op } from 'sequelize';
     const order = queryParams.order || 'ASC'; 
     
     return await Artist.findAll({
-    attributes: ['id', 'name', 'biography'],
+    attributes: ['id', 'name', 'biography', 'genres'],
     order: [[sort, order]],
     limit: limit,
     offset: offset
@@ -20,7 +20,7 @@ import { Op } from 'sequelize';
 
 const getArtistById = async (id) => {
     return await Artist.findByPk(id, {
-        attributes: ['id', 'name', 'biography']  // Add this line
+        attributes: ['id', 'name', 'biography', 'genres'] 
     });
 };
 

@@ -1,21 +1,64 @@
 "use strict";
-import {
-  createArtist,
-  updateArtist,
-  deleteArtist,
-  createAlbum,
-  updateAlbum,
-  deleteAlbum,
-  createTrack,
-  updateTrack,
-  deleteTrack
-} from './modify.js';
+
+import { showCreateArtistModal, showEditArtistModal } from './modify.js';
+import { updateArtist, deleteArtist } from './CRUD.js';
+
+// Initial Setup based on sessionStorage
+window.addEventListener('load', function() {
+    console.log("Page loaded");
+    const lastTab = sessionStorage.getItem('lastTab');
+    if (lastTab === 'home') {
+        navigateToHomePage();
+    } else if (lastTab === 'artists') {
+        navigateToArtistsPage();
+    } else if (lastTab === 'albums') {
+        navigateToAlbumsPage();
+    } else if (lastTab === 'tracks') {
+        navigateToTracksPage();
+    } else if (lastTab === 'favorites') {
+        navigateToFavoritesPage();
+    } else if (lastTab === 'about') {
+        navigateToAboutPage();
+    } else {
+        navigateToHomePage();
+    }
+});
 
 // Global Variables
 let artists = []; // Store fetched artist data
-let favorites = []; // Store user favorites
 let albums = []; // store fetched album data
+let genre = [];
+let isNavigatingToGenrePage = false;
 let lastViewedArtist = null; 
+window.deleteArtists = deleteArtists;
+window.deleteArtist = deleteArtist;
+window.toggleFavorite = toggleFavorite;
+let favorites = [];
+const storedFavorites = localStorage.getItem('favorites');
+if (storedFavorites) {
+    favorites = JSON.parse(storedFavorites);
+}
+
+// Initialize page state
+window.onload = function() {
+    
+    // Fetch artists and albums first
+    Promise.all([fetchArtists(), fetchAlbums()]).then(() => {
+        const lastTab = sessionStorage.getItem('lastTab');
+        if (lastTab === 'favorites') {
+            navigateToFavoritesPage();
+        } else if (lastTab === 'genre') {
+            // Assuming you have a function to navigate to the genre page
+            navigateToGenrePage();
+        } else {
+            // Handle the default case, if needed
+        }
+    }).catch(error => {
+        console.error('Error initializing page:', error);
+    });
+    createGenreModal();
+};
+
 
 // Create the album-popup and overlay divs
 const albumPopup = document.createElement('div');
@@ -31,17 +74,54 @@ overlay.classList.add('overlay');
 document.body.appendChild(albumPopup);
 document.body.appendChild(overlay);
 
-// Initial Setup
-navigateToHomePage();
+// To hide the popup and overlay
+overlay.addEventListener('click', function(event) {
+    console.log("Overlay event triggered");  // Debugging line
+    console.log("Event target:", event.target);  // Debugging line
+    console.log("Overlay element:", overlay);  // Debugging line
+
+    if (event.target === overlay) {
+        console.log("Overlay clicked!");  // Debugging line
+        albumPopup.classList.remove('active');
+        overlay.classList.remove('active');
+        artistPopup.classList.remove('active');
+        document.getElementById('genreModal').style.display = 'none';  // Close the genre modal as well
+    } else {
+        console.log("Clicked inside the modal, not the overlay");  // Debugging line
+    }
+});
+
 
 // Event Listeners for Navigation
 document.getElementById('home').addEventListener('click', navigateToHomePage);
 document.getElementById('artistsPage').addEventListener('click', navigateToArtistsPage);
 document.getElementById('albumsPage').addEventListener('click', navigateToAlbumsPage);
 document.getElementById('tracksPage').addEventListener('click', navigateToTracksPage);
-document.getElementById('genrePage').addEventListener('click', navigateToGenrePage);
+document.getElementById('genrePage').addEventListener('click', showGenreModal);
 document.getElementById('favoritesPage').addEventListener('click', navigateToFavoritesPage);
 document.getElementById('aboutPage').addEventListener('click', navigateToAboutPage);
+
+// Add this function to dynamically add the "Create Artist" button
+function addCreateArtistButton() {
+    const nav = document.querySelector('nav');
+    if (!document.getElementById('createArtistButton')) {
+        const createArtistButton = document.createElement('a');
+        createArtistButton.id = 'createArtistButton';
+        createArtistButton.href = '#';
+        createArtistButton.textContent = 'Create Artist';
+        createArtistButton.addEventListener('click', showCreateArtistModal);
+        nav.appendChild(createArtistButton);
+    }
+}
+
+
+// Add this function to dynamically remove the "Create Artist" button
+function removeCreateArtistButton() {
+    const createArtistButton = document.getElementById('createArtistButton');
+    if (createArtistButton) {
+        createArtistButton.remove();
+    }
+}
 
 // To hide the popup and overlay
 overlay.addEventListener('click', function() {
@@ -54,126 +134,153 @@ overlay.addEventListener('click', function() {
 
 // Navigation Functions
 function navigateToHomePage(event) {
+    sessionStorage.setItem('lastTab', 'home');
+    removeCreateArtistButton();
     if (event) event.preventDefault();
     const contentDiv = document.getElementById('content');
+    document.getElementById('content').classList.remove('favorites-page');
     contentDiv.innerHTML = `
         <h1>Welcome to Music Directory</h1>
         <p>Explore artists, albums, and tracks.</p>
     `;
 }
 
-// Modify this function
-function navigateToArtistsPage(event) {
-    console.log("Navigating to Artists Page");
+async function navigateToArtistsPage(event) {
+    document.getElementById('content').classList.remove('favorites-page');
+    sessionStorage.setItem('lastTab', 'artists');
+    addCreateArtistButton();
     if (event) event.preventDefault();
     setupPageContent('artists', 'Search for artists...');
-    fetchArtists();
 
-    // Add the "Create New Artist" button only on the Artists page
-    const artistButtonContainer = document.getElementById('artistButtonContainer');
-    artistButtonContainer.innerHTML = '<button id="showCreateArtistFormButton">Create New Artist</button>';
+    // Fetch artists and wait for it to complete
+    await fetchArtists();
 
-    // Attach event listener to the new button
-    document.getElementById('showCreateArtistFormButton').addEventListener('click', showCreateArtistForm);
-}
+    // Generate the HTML for artists
+    const artistHTML = displayArtists(artists);
 
-// Add this new function
-function showCreateArtistForm(event) {
-    console.log("Showing Create Artist Form");
-
-    if(event) event.preventDefault();
-  
-    const formHTML =  `
-        <h1>Create New Artist</h1>
-        <form id="create-artist-form">
-            <label for="name">Name:</label>
-            <input type="text" id="name" required>
-            <!-- Add other fields here -->
-            <button type="submit">Create Artist</button>
-        </form>
+    // Insert the generated HTML into the DOM
+    const contentDiv = document.getElementById('artists');
+    contentDiv.innerHTML = `
+        ${artistHTML}
     `;
 
-    document.getElementById('dynamicFormContainer').innerHTML = formHTML;
-
-    // Add event listener for form submission
-document.getElementById('create-artist-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    
-    const newArtist = {
-        name: document.getElementById('name').value,
-        birthdate: document.getElementById('birthdate').value,
-        activeSince: document.getElementById('activeSince').value,
-        genres: Array.from(document.querySelectorAll('input[name="genres"]:checked')).map(checkbox => checkbox.value),
-        labels: document.getElementById('labels').value.split(',').map(s => s.trim()),
-        website: document.getElementById('website').value,
-        image: '', // Initialize image as an empty string
-        shortDescription: document.getElementById('shortDescription').value
-    };
-    
-    // Check which image source option is selected
-    const uploadImageRadio = document.getElementById('uploadImage');
-    if (uploadImageRadio.checked) {
-        // Handle image upload
-        const imageFile = document.getElementById('imageUpload').files[0];
-        if (imageFile) {
-            newArtist.image = imageFile.name;
-        }
-    } else {
-        // Handle image link
-        newArtist.image = document.getElementById('imageLinkInput').value;
+    // Add event listener to the "Create Artist" button
+    const createArtistButton = document.getElementById('create-artist-button'); // Assuming you have a button with this ID
+    if (createArtistButton) {
+        createArtistButton.addEventListener('click', showCreateArtistModal);
     }
+}
 
-    createNewArtist(newArtist)
-        .then(artist => {
-            artists.push(artist); // Make sure artists is defined
-            // showArtists(); // Make sure showArtists is defined
-
-            document.getElementById('createArtistModal').style.display = "none";
-            alert('Artist has been created :)');
-        })
-        .catch(error => {
-            console.error("Error adding artist:", error);
-            alert('There was an issue adding the artist. Please try again.');
-        });
-})};
+document.querySelector('.close-btn-create').addEventListener('click', function() {
+    document.getElementById('createArtistModal').style.display = 'none';
+});
 
 function navigateToAlbumsPage(event) {
+    sessionStorage.setItem('lastTab', 'albums');
+    document.getElementById('content').classList.remove('favorites-page');
+    removeCreateArtistButton();
     if (event) event.preventDefault();
     setupPageContent('albums', 'Search for albums...');
     fetchArtists().then(() => fetchAlbums());
 }
 
 function navigateToTracksPage(event) {
+    sessionStorage.setItem('lastTab', 'tracks');
+    document.getElementById('content').classList.remove('favorites-page');
+    removeCreateArtistButton();
     if (event) event.preventDefault();
     setupPageContent('tracks', 'Search for tracks...');
     fetchTracks();
 }
 
-function navigateToGenrePage(event) {
-    if (event) event.preventDefault();
-    const contentDiv = document.getElementById('content');
-    const uniqueGenres = [...new Set(artists.map(artist => artist.genre))];
-    contentDiv.innerHTML = `
-        <h2>Genres</h2>
-        <ul>
-            ${uniqueGenres.map(genre => `<li>${genre}</li>`).join('')}
-        </ul>
-    `;
+// Få en unik liste over genrer
+function getUniqueGenres() {
+    console.log("getUniqueGenres called");
+    const genres = new Set();
+    artists.forEach(artist => {
+        if (artist.genres) {  // Check if artist.genres is defined
+            const genreArray = artist.genres.split(', ');  // Convert the string to an array
+            genreArray.forEach(genre => {
+                genres.add(genre);
+            });
+        }
+    });
+    return [...genres];
 }
+
+function navigateToGenrePage(event) {
+    console.log("navigateToGenrePage called");
+    sessionStorage.setItem('lastTab', 'genre');
+    document.getElementById('content').classList.remove('favorites-page');
+    
+    // Use the flag variable to conditionally remove the "Create Artist" button
+    if (isNavigatingToGenrePage) {
+        removeCreateArtistButton();
+    }
+    
+    if (event) event.preventDefault();
+    
+    const uniqueGenres = getUniqueGenres(); 
+
+    let genreListHTML = '';
+    uniqueGenres.forEach((genre, index) => {
+        if (index % 5 === 0) genreListHTML += `<div class="genre-row">`;
+
+        genreListHTML += `<div class="genre-icon" onclick="showArtistsByGenre('${genre}')">
+            <img src="./genre-icons/${genre}.png" alt="${genre}"> 
+            <p>${genre}</p>
+        </div>`;
+
+        if ((index + 1) % 5 === 0 || index === uniqueGenres.length - 1) genreListHTML += `</div>`;
+    });
+
+    const genreModal = document.getElementById('genreModal');
+    if (genreModal) {
+        console.log("Genre modal found");
+        const genreContent = genreModal.querySelector('#genre-content');
+        if (genreContent) {
+            genreContent.innerHTML = genreListHTML;
+        } else {
+            console.error('Element with id "genre-content" not found');
+        }
+        genreModal.style.display = "block";
+    } else {
+        console.log("Genre modal not found");
+        // Handle the error appropriately, maybe show a message to the user
+    }
+}
+
 
 function navigateToFavoritesPage(event) {
+    sessionStorage.setItem('lastTab', 'favorites');
+    removeCreateArtistButton();
     if (event) event.preventDefault();
     const contentDiv = document.getElementById('content');
+    contentDiv.classList.add('favorites-page');
+
+    // Fetch the latest favorites from localStorage
+    const storedFavorites = localStorage.getItem('favorites');
+    if (storedFavorites) {
+        favorites = JSON.parse(storedFavorites);
+    }
+
     const favoriteArtists = artists.filter(artist => favorites.includes(artist.id));
+    const artistHTML = displayArtists(favoriteArtists);
     contentDiv.innerHTML = `
         <h2>Favorites</h2>
-        ${generateArtistsHTML(favoriteArtists)}
+        <div class="artist-grid-container">
+            ${artistHTML}
+        </div>
     `;
 }
 
+
 function navigateToAboutPage(event) {
+    sessionStorage.setItem('lastTab', 'about');
+    removeCreateArtistButton();
     if (event) event.preventDefault();
     const contentDiv = document.getElementById('content');
+    document.getElementById('content').classList.remove('favorites-page');
     contentDiv.innerHTML = `
         <h2>About Music Directory</h2>
         <p>This is a platform to explore various artists, their albums, and tracks. Dive into the world of music and discover something new today!</p>
@@ -211,7 +318,6 @@ function setupPageContent(sectionId, placeholderText) {
 }
 
 // Fetch and Display Functions
-
 function fetchAlbums() {
     return fetch('http://localhost:3006/albums')
     .then(response => response.json())
@@ -229,6 +335,12 @@ function fetchTracks() {
         .catch(error => console.error('Error fetching tracks:', error));
 }
 
+async function fetchTracksForAlbum(albumId) {
+    const response = await fetch(`http://localhost:3006/albums/${albumId}/tracks`);
+    const tracks = await response.json();
+    return tracks;
+}
+
 function fetchArtists() {
     return fetch('http://localhost:3006/artists')
         .then(response => response.json())
@@ -242,13 +354,194 @@ function fetchArtists() {
         .catch(error => console.error('Error fetching artists:', error));
 }
 
-function displayArtists(artistsList) {
-    const artistContainer = document.getElementById('artists');
-    artistContainer.innerHTML = generateArtistsHTML(artistsList);
+function createGenreModal() {
+    const modal = document.createElement('div');
+    modal.id = 'genreModal';
+    modal.className = 'modal';
+
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content genre-modal-content';
+
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    const genreContent = document.createElement('div');
+    genreContent.id = 'genre-content';
+
+    modalContent.appendChild(closeBtn);  // Add this line back if you want the close button
+    modalContent.appendChild(genreContent);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+
+document.getElementById('genreModal').addEventListener('click', function(event) {
+    console.log("Clicked on overlay");
+    if (event.target === this || event.target.className === 'close-btn') {
+        this.style.display = 'none';
+    }
+});
+
 }
+
+function showGenreModal(event) {
+    console.log("showGenreModal called");
+    isNavigatingToGenrePage = false; // Set the flag to false
+    showGenre(); // Populate the modal with genres
+    document.getElementById('genreModal').style.display = 'block';
+    if (event) event.preventDefault();
+}
+
+function showGenre(event) {
+    console.log("showGenre called");
+    if(event) event.preventDefault();
+    const uniqueGenres = getUniqueGenres();
+
+let genreListHTML = '';
+uniqueGenres.forEach((genre, index) => {
+    if (index % 5 === 0) genreListHTML += `<div class="genre-row">`; // Begin a new row every 5 items
+
+    genreListHTML += `<div class="genre-icon" onclick="showArtistsByGenre('${genre}')">
+        <img src="./genre-icons/${genre}.png" alt="${genre}"> 
+        <p>${genre}</p>
+    </div>`;
+
+    if ((index + 1) % 5 === 0 || index === uniqueGenres.length - 1) genreListHTML += `</div>`; // End the row
+});
+
+  document.getElementById('genre-content').innerHTML = genreListHTML;
+}
+
+async function showArtistsByGenre(genre) {
+    isNavigatingToGenrePage = true; 
+    removeCreateArtistButton();
+    document.getElementById('genreModal').style.display = 'none';
+    
+    const contentDiv = document.getElementById('content');
+    contentDiv.innerHTML = '<div class="genre-page"></div>';
+    const genrePageDiv = document.querySelector('.genre-page');
+    
+    // Declare these variables at a higher scope
+    let artistListHTML = '';
+    let albumListHTML = '';
+    
+    // Add checkboxes for toggling artists and albums
+    let toggleHTML = `
+        <div class="toggle-options">
+            <input type="checkbox" id="showArtists" checked>
+            <label for="showArtists">Show Artists</label>
+            <input type="checkbox" id="showAlbums" checked>
+            <label for="showAlbums">Show Albums</label>
+        </div>
+    `;
+
+    if (genrePageDiv) {
+        console.log("Artists before filtering:", artists);
+         const filteredArtists = artists.filter(artist => {
+        return artist.genres && artist.genres.includes(genre); // Add this check
+    });
+        artistListHTML = `<h1 class="genre">${genre} (Artists) </h1>`;
+        let rowOpen = false;
+
+            filteredArtists.forEach((artist, index) => {
+            if (index % 4 === 0) {
+                artistListHTML += `<div class="artist-row">`;
+                rowOpen = true;
+            }
+
+            const imageName = `${artist.id}.jpg`;
+            artistListHTML += `
+                <div class="artist-card">
+                    <img src="./artists/${imageName}" alt="${artist.name}">
+                    <h3>${artist.name}</h3>
+                    <p>${artist.biography}</p>
+                    <button class="favorite-btn" data-artist-id="${artist.id}" onclick="event.stopPropagation(); toggleFavorite(${artist.id})">${favorites.includes(artist.id) ? '❤️' : '🤍'}</button>
+                </div>
+            `;
+
+            if ((index + 1) % 4 === 0 || index === filteredArtists.length - 1) {
+                artistListHTML += `</div>`;
+                rowOpen = false;
+            }
+        });
+
+        const filteredAlbums = albums.filter(album => {
+            const artist = artists.find(a => a.id === album.artist_id);
+            return artist && artist.genres.includes(genre);
+        });
+
+albumListHTML = '<h2 id="albumHeader">Albums</h2>';
+for (const album of filteredAlbums) {
+    const tracks = await fetchTracksForAlbum(album.id);  // Fetch tracks for each album
+    let songListHTML = '<ul class="track-list">';
+    tracks.forEach((track, i) => {
+        songListHTML += `<li>${i + 1}. ${track.title} ${track.duration}</li>`;
+    });
+    songListHTML += '</ul>';
+
+    albumListHTML += `
+        <div class="album-card">
+            <img src="./images/${album.id}.jpg" alt="${album.title}" class="album-cover">
+            <div class="album-info">
+                <h3>${album.title}</h3>
+                <p>Release Date: ${album.release_date}</p>
+                ${songListHTML}
+            </div>
+        </div>`;
+}
+
+    // Combine toggle options, artist list, and album list
+genrePageDiv.innerHTML = toggleHTML + artistListHTML + albumListHTML;
+
+// Add event listeners to checkboxes to toggle visibility
+document.getElementById('showArtists').addEventListener('change', function() {
+    const artistCards = document.querySelectorAll('.artist-card');
+    artistCards.forEach(card => {
+        card.style.display = this.checked ? 'block' : 'none';
+    });
+});
+
+document.getElementById('showAlbums').addEventListener('change', function() {
+    const albumCards = document.querySelectorAll('.album-card');
+    const albumHeader = document.getElementById('albumHeader');
+    albumCards.forEach(card => {
+        card.style.display = this.checked ? 'block' : 'none';
+    });
+    albumHeader.style.display = this.checked ? 'block' : 'none';  // Hide or show the album header
+});
+
+    } else {
+        console.error('genre-page div not found');
+    }
+}
+
+
+const genreTabElement = document.getElementById('genrePage');
+if (genreTabElement) {
+    genreTabElement.addEventListener('click', function() {
+        console.log("Genre tab clicked");
+        
+        // Set the flag variable based on your condition
+        isNavigatingToGenrePage = false;
+        
+        showGenreModal();
+    });
+} else {
+    console.log("Element with ID 'genrePage' not found.");
+}
+
 
 function displayAlbums(albums) {
     const albumContainer = document.getElementById('albums');
+    console.log(document.getElementById('albums'));  // Debugging line
+    if (!albumContainer) {
+        console.error('Element with id "albums" not found');
+        return;
+    }
+    
     let html = '';
     console.log("Artists array:", artists);  // Debugging line
     albums.forEach(album => {
@@ -267,6 +560,7 @@ function displayAlbums(albums) {
     });
     albumContainer.innerHTML = html;
 }
+
 
 function displayTracks(tracks) {
     const trackContainer = document.getElementById('tracks');
@@ -324,17 +618,6 @@ document.getElementById('content').addEventListener('click', async function(even
     }
 });
 
-// Fetch tracks for a specific album
-async function fetchTracksForAlbum(albumId) {
-    try {
-        const response = await fetch(`http://localhost:3006/albums/${albumId}/tracks`);
-        const tracks = await response.json();
-        return tracks;
-    } catch (error) {
-        console.error('Error fetching tracks for album:', error);
-        return [];
-    }
-}
 
 // Search functions for each section
 function searchArtists(query) {
@@ -358,45 +641,65 @@ function searchTracks(query) {
         .catch(error => console.error('Error searching tracks:', error));
 }
 
+// Assuming this is in your main JavaScript module where toggleFavorite is defined
 function toggleFavorite(artistId) {
-    const index = favorites.indexOf(artistId);
-    if (index > -1) {
+    const wasFavorited = favorites.includes(artistId);
+
+    if (wasFavorited) {
+        const index = favorites.indexOf(artistId);
         favorites.splice(index, 1);
     } else {
         favorites.push(artistId);
     }
-    displayArtists(artists); // Re-render the artists to reflect the change
+
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+
+    // Update the heart icon
+    const heartButton = document.querySelector(`.favorite-btn[data-artist-id="${artistId}"]`);
+    if (heartButton) {
+        heartButton.innerHTML = favorites.includes(artistId) ? '❤️' : '🤍';
+    }
+
+    // Refresh the favorites view if an artist is unfavorited and you're on the favorites page
+    if (wasFavorited && !favorites.includes(artistId) && sessionStorage.getItem('lastTab') === 'favorites') {
+    }
 }
 
+// Display artists Function
+function displayArtists(artistsList) {
+    return artistsList.map(artist => {
+        // Retrieve image from localStorage
+        const base64Image = localStorage.getItem(`artistImage_${artist.name}`);
+        const imageSource = base64Image ? `data:image/jpeg;base64,${base64Image}` : `./artists/${artist.id}.jpg`;
 
-// Helper Function
-function generateArtistsHTML(artistsList) {
-    let html = '';
-    artistsList.forEach(artist => {
-        html += `
-              <div class="artist-card" data-artist-id="${artist.id}">
-                <button class="delete-artist" onclick="deleteArtist(${artist.id})">X</button>
+        return `
+            <div class="artist-card" data-artist-id="${artist.id}">
                 <div class="artist-image-container">
-                    <img src="./artists/${artist.id}.jpg" alt="${artist.name}">
-                    <div class="overlay">
-                        <button class="play-btn">Play</button>
-                    </div>
+                    <i class="delete-icon" onclick="event.stopPropagation(); deleteArtists(${artist.id});" title="Delete">✖</i>
+                    <img src="${imageSource}" alt="${artist.name}">
                 </div>
-                <div class="artist-info">
-                    <h3>${artist.name}</h3>
-                    <p>${artist.biography}</p>
-                </div>
-                <div class="artist-actions">
-                    <button class="favorite-btn" onclick="toggleFavorite(${artist.id})">${favorites.includes(artist.id) ? '❤️' : '🤍'}</button>
-                </div>
-            <button class="update-artist" onclick="updateArtist(${artist.id})">Update</button>
-            </div>
-        `;
-    });
-    return html;
+                <h3>${artist.name}</h3>
+                <p>${artist.biography}</p>
+                <button class="favorite-btn" data-artist-id="${artist.id}" onclick="event.stopPropagation(); toggleFavorite(${artist.id})">${favorites.includes(artist.id) ? '❤️' : '🤍'}</button>
+                <i class="edit-icon" data-artist-id="${artist.id}" data-action="edit">🖊️</i>
+            </div>`;
+    }).join('');
 }
+
 
 document.getElementById('content').addEventListener('click', function(event) {
+    const action = event.target.getAttribute('data-action');
+    const artistId = event.target.getAttribute('data-artist-id');
+
+    if (action === 'edit') {
+        event.stopPropagation(); // Stop the event from propagating to the artist card
+        const artist = artists.find(a => a.id === parseInt(artistId));
+        if (artist) {
+            showEditArtistModal(artist); // Call your function to show the edit modal
+            return; // Exit the function early
+        }
+    }
+
     if (event.target.closest('.artist-card')) {
         const artistElement = event.target.closest('.artist-card');
         const artistId = artistElement.getAttribute('data-artist-id');
@@ -406,7 +709,6 @@ document.getElementById('content').addEventListener('click', function(event) {
         }
     }
 });
-
 
 async function displayArtistPopup(artist) {
     lastViewedArtist = artist; // Store the artist being viewed
@@ -482,3 +784,33 @@ artistPopup.addEventListener('click', function(event) {
         displayAlbumPopup(albumId);
     }
 });
+
+// Delete artist
+function deleteArtists(artistId) {
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this artist?");
+    if (!confirmDelete) return;
+
+    // Using the function from rest-service.js to delete the artist
+    deleteArtist(artistId)
+        .then(() => {
+            artists = artists.filter(artist => artist.id !== artistId);
+            navigateToArtistsPage();
+            alert('Artist has been deleted :)');
+        })
+        .catch(error => {
+            console.error("Error deleting artist:", error);
+            alert('There was an issue deleting the artist. Please try again.');
+        });
+}
+
+window.showArtistsByGenre = showArtistsByGenre;
+
+export {
+    displayAlbums,
+    displayArtists,
+    displayTracks,
+    getUniqueGenres,
+    fetchArtists,
+    showArtistsByGenre
+};
