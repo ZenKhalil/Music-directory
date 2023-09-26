@@ -7,11 +7,12 @@ const sequelize = new Sequelize(
   development.password,
   {
     host: development.host,
+    port: development.port,  // Include the port
     dialect: 'mysql',
-    logging: console.log  // Add this line
+    logging: console.log,
+    dialectOptions: development.dialectOptions  // Include SSL configuration
   }
 );
-
 
 sequelize.authenticate()
   .then(() => {

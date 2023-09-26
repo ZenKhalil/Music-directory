@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "root_base",
+    "password": "qwaszx1212@",
+    "database": "music_db",
+    "host": "root23.mysql.database.azure.com",
+    "dialect": "mysql",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "ca": "./DigiCertGlobalRootCA.crt.pem"
+      }
+    }
+  },
+  "test": {
+    "username": "root",
+    "password": "Kim2300@",
+    "database": "music_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "Kim2300@",
+    "database": "music_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

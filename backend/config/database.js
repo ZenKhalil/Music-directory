@@ -9,20 +9,26 @@ const development = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: 'mysql'
-};
-
-// Add SSL certificate if provided in environment variables
-if (process.env.DB_CERT === 'true') {
-    development.dialectOptions = {
+    port: process.env.DB_PORT || 3306,
+    dialect: 'mysql',
+    dialectOptions: {
         ssl: {
             ca: await fs.readFile("./DigiCertGlobalRootCA.crt.pem", 'utf8')
         }
-    };
-}
+    }
+};
 
-// Create a connection to the database
-const dbConnection = mysql.createConnection(development);
+const mysqlConfig = {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    port: process.env.DB_PORT || 3306,
+    ssl: {
+        ca: await fs.readFile("./DigiCertGlobalRootCA.crt.pem", 'utf8')
+    }
+};
 
-export default dbConnection;
+const dbConnection = mysql.createConnection(mysqlConfig);
+
+export { development, dbConnection };
