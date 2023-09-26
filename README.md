@@ -27,6 +27,9 @@ This project is a music directory that allows users to explore various artists, 
 
 ## Setup
 
+## Link to server site
+https://music-directory.azurewebsites.net/
+
 ### If you're using both the backend and frontend:
 
 #### Backend Setup:
@@ -35,13 +38,6 @@ This project is a music directory that allows users to explore various artists, 
    - npm install
 4. Start the backend server:
    - node app.js
-
-#### Frontend Setup:
-1. Clone the frontend repository to your local machine.
-2. Open `index.html` in your browser.
-
-Ensure that both the backend and frontend are running simultaneously for the application to work correctly.
-
 
 ## Features
 ### Navigation and Session Management
