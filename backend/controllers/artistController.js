@@ -45,6 +45,7 @@ export const createArtist = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
+<<<<<<< Updated upstream
     try {
         const artist = await artistService.createArtist(req.body);
         res.status(201).json(artist);
@@ -63,6 +64,55 @@ export const updateArtist = async (req, res, next) => {
         }
     } catch (error) {
         next(error);
+=======
+    // Ensure genres is processed as a comma-separated string
+  let genres = req.body.genres; // instead of req.body.artist_genres
+  if (typeof genres === "string") {
+    genres = genres.split(", ").map((genre) => genre.trim());
+  } else if (!Array.isArray(genres)) {
+    return res.status(400).json({
+      errors: [
+        { msg: "Invalid genres format, it should be a string or an array." },
+      ],
+    });
+  }
+
+  const artistData = {
+    name: req.body.name,
+    biography: req.body.biography,
+    genres: genres.join(", "), // using our processed genres array here
+    image: req.file ? req.file.buffer : null,
+  };
+
+    const artist = await artistService.createArtist(artistData);
+    res.status(201).json(artist);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateArtist = async (req, res, next) => {
+  try {
+    console.log("Received request body:", req.body);
+
+let genres = req.body.genres; // instead of req.body.artist_genres
+if (typeof genres === "string") {
+  genres = genres.split(", ").map((genre) => genre.trim());
+}
+
+const artistData = {
+  name: req.body.name,
+  biography: req.body.biography,
+  genres: genres.join(", "), // using our processed genres array here
+  image: req.file ? req.file.buffer : null,
+};
+
+    const artist = await artistService.updateArtist(req.params.id, artistData);
+    if (artist) {
+      res.json(artist);
+    } else {
+      res.status(404).send("Artist not found");
+>>>>>>> Stashed changes
     }
 };
 

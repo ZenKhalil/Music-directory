@@ -4,6 +4,7 @@ import mysql from 'mysql2';
 
 dotenv.config();
 
+<<<<<<< Updated upstream
 const development = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
@@ -16,6 +17,14 @@ const development = {
             ca: await fs.readFile("./DigiCertGlobalRootCA.crt.pem", 'utf8')
         }
     }
+=======
+export const development = {
+    username: process.env.DB_USERNAME || 'root',
+    password: process.env.DB_PASSWORD || 'Abc1234@',
+    database: process.env.DB_DATABASE || 'music_db',
+    host: process.env.DB_HOST || '127.0.0.1',
+    dialect: 'mysql'
+>>>>>>> Stashed changes
 };
 
 const mysqlConfig = {
