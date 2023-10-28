@@ -3,3 +3,7 @@ dotenv
 .env
 DigiCertGlobalRootCA.crt.pem
 .env
+.gitignore
+package-lock.json
+package.json
+frontend
