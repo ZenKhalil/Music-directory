@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import * as albumService from '../services/albumService.js';
 import * as trackService from '../services/trackService.js';
 
@@ -24,6 +25,66 @@ export const getAllAlbums = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+=======
+import * as albumService from "../services/albumService.js";
+import * as trackService from "../services/trackService.js";
+import Album from "../models/albumModel.js";
+
+//export const uploadAlbumImage = async (req, res, next) => {
+//  try {
+//    const albumData = req.body;
+//    const imageFile = req.file; // Assuming you're using something like multer for file handling
+//    const album = await createAlbumWithImage(albumData, imageFile);
+//    res.status(201).json(album);
+//  } catch (error) {
+//    next(error);
+//  }
+//};
+
+export const retrieveAlbumImage = async (req, res, next) => {
+  const albumId = req.params.id;
+
+  try {
+    console.log(`Attempting to retrieve image for album ID: ${albumId}`);
+
+    const album = await Album.findByPk(albumId);
+
+    if (!album) {
+      return res.status(404).send("Album not found");
+    }
+
+    if (!album.image) {
+      console.error(`No image associated with album ID ${albumId}.`);
+      return res.status(404).send("Image not found");
+    }
+
+    // Send the image data with the appropriate content type
+    res.set("Content-Type", "image/jpg");
+    res.send(album.image);
+  } catch (error) {
+    console.error(`Error retrieving image for album ID ${albumId}:`, error);
+    next(error);
+  }
+};
+export const getAllAlbums = async (req, res, next) => {
+  try {
+    const { sort, order, release_date, title, limit, offset } = req.query;
+
+    const queryParams = {
+      sort: sort,
+      order: order,
+      release_date: release_date,
+      title: title,
+      limit: limit,
+      offset: offset,
+    };
+
+    const albums = await albumService.getAllAlbums(queryParams);
+    res.json(albums);
+  } catch (error) {
+    next(error);
+  }
+>>>>>>> Stashed changes
 };
 
 export const getTracksByAlbum = async (req, res, next) => {

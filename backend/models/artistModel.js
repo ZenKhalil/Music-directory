@@ -1,6 +1,11 @@
+<<<<<<< Updated upstream
 import { DataTypes } from 'sequelize';
 import sequelize from './index.js';
 import Album from './albumModel.js'; // Import the Album model for the association
+=======
+import { DataTypes } from "sequelize";
+import sequelize from "./index.js";
+>>>>>>> Stashed changes
 
 const Artist = sequelize.define('Artist', {
   id: {
